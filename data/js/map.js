@@ -1,7 +1,12 @@
 var F = Raphael.format;
 
-var Hex = function(paper, x, y) {
-    var hex = paper.path(Raphael.format("M{0} {1}l30 25l40 0l30 -25l-30 -25l-40 0z", [x, y]));
+var Hex = function(paper, x, y, w, h) {
+    var f1 = w / 7 * 6,
+        f2 = w / 7 * 8;
+
+    var hex = paper.path(
+        Raphael.format(
+            "M{0} {1}l{2} {4}l{3} 0l{2} -{4}l-{2} -{4}l-{3} 0z", [x, y, f1, f2, h]));
     hex.attr("fill", "#fff");
 
     hex.used = false;
@@ -34,16 +39,19 @@ var Map = function(rows, cols) {
     this.users = new Object();
     this._user = 0;
 
+    this.rows = rows;
+    this.cols = cols;
+
     for(col=0;col<cols;col++) {
         this.cells[col] = [];
     }
 
-    this.add_user = function() {
+    this.add_user = function(x, y) {
         this._user++;
 
         var uid = this._user;
 
-        var user = new User(uid);
+        var user = new User(uid, x, y);
 
         this.users[uid] = user;
 
@@ -89,33 +97,36 @@ var Map = function(rows, cols) {
     return this;
 };
 
-var User = function(uid) {
-    this.x = 6;
-    this.y = 6;
+var User = function(uid, x, y) {
+    this.x = x;
+    this.y = y;
     this.uid = uid;
 
     return this;
 };
 
+HEX_W = 21;
+HEX_H = 16;
+
 var draw_map = function(el) {
     var paper = Raphael(el, 1100, 600);
     paper.hex = function(x, y) {
-        return Hex(paper, x, y);
+        return new Hex(paper, x, y, HEX_W, HEX_H);
     }
 
-    var row, rows = 20,
-        col, cols = 30;
+    var row, rows = 25,
+        col, cols = 35;
 
     var map = Map(rows, cols);
 
     for(row=0; row<rows; row+=2) {
-        var y = (row * 25) + 40, _y = 0;
+        var y = (row * HEX_H) + 40, _y = 0;
         var _row = 0;
 
         for(col=0; col<cols; col+=2) {
 
             if((col % 4)==0) {
-                _y = 25;
+                _y = HEX_H;
                 _row = row + 1;
 
             } else {
@@ -123,10 +134,10 @@ var draw_map = function(el) {
                 _row = row;
             }
 
-            var x = col * 35;
+            var x = col * HEX_W;
 
             var hex = paper.hex(x, y + _y);
-            hex.text = paper.text(x + 25, y + _y , Raphael.format("{0}x{1}", [col, _row]));
+            hex.text = paper.text(x + HEX_H, y + _y , Raphael.format("{0}x{1}", [col, _row]));
             hex.col = col;
             hex.row = _row;
 
@@ -136,7 +147,7 @@ var draw_map = function(el) {
         }
     }
 
-    var user = map.add_user();
+    var user = map.add_user(6, 6);
 
     key('l', function() {map.move(user, 2, 1)});
     key('o', function() {map.move(user, 2, -1)});
