@@ -16,12 +16,16 @@ var Hex = function(paper, x, y, w, h) {
        hex.text.hide();
 
        hex.used = whom;
+
+       if(whom != undefined && whom.img != undefined)
+           hex.img = whom.img;
     };
 
     hex.free = function() {
        hex.attr("fill", 'green');
        hex.text.show();
        hex.used = false;
+       hex.img = false;
     };
 
     hex.node.onclick = function() {
@@ -57,12 +61,22 @@ var Map = function(rows, cols) {
         this.cells[col] = [];
     }
 
-    this.add_user = function(x, y) {
+    this.add_user = function(x, y, img) {
         this._user++;
 
         var uid = this._user;
+        var img_o = undefined;
 
-        var user = new User(uid, x, y);
+        if(img !== undefined) {
+            img_o = this.paper.image(F("/img/char/{0}_{1}.png",[img, 0]), x * HEX_W, y * HEX_H, 100, 40);
+            img_o._img = img;
+            img_o._sprite_x_off = 0;
+            img_o._sprite = 0;
+        }
+
+        _img = img_o;
+
+        var user = new User(uid, x, y, img_o);
 
         this.users[uid] = user;
 
@@ -100,13 +114,44 @@ var Map = function(rows, cols) {
         }
 
         old.free();
-        next.use();
+        next.use(user);
 
         console.log(F("move from {0}x{1} to {2}x{3}",
                     [user.x, user.y, next.col, next.row]));
 
         user.x = next.col;
         user.y = next.row;
+
+        if(user.img != undefined) {
+            var sprite = user.img._sprite,
+                sprite_x_off = user.img._sprite_x_off;
+
+            if(o_x > 0) {
+                sprite = 1;
+                sprite_x_off = -30;
+
+            } else if (o_x < 0) {
+                sprite = 0;
+                sprite_x_off = 0;
+            }
+
+            user.img.attr("src", F("/img/char/{0}_{1}.png",[user.img._img, sprite]));
+
+            user.img.animateAlong(F("M{0},{1}L{2},{3}",[
+
+                    (old.col * HEX_W)+user.img._sprite_x_off,
+                    old.row * HEX_H,
+
+                    (next.col * HEX_W)+sprite_x_off,
+                    next.row * HEX_H
+                    ]), 
+                    100
+            );
+            user.img._sprite_x_off = sprite_x_off;
+            user.img._sprite = sprite;
+
+            user.img.toFront();
+        }
 
         this.recenter(user.x, user.y);
 
@@ -246,6 +291,9 @@ var Map = function(rows, cols) {
                 hex.translate(move_x, move_y);
                 hex.text.translate(move_x, move_y);
 
+                if(hex.img)
+                    hex.img.translate(move_x, move_y);
+
                 if(hex.used == false)
                     hex.attr("fill", "yellow");
 
@@ -253,7 +301,7 @@ var Map = function(rows, cols) {
 
         };
 
-        var col_lim = x + this.cols/2;
+        var col_lim = x + this.cols;
 
         var move = function(col_n) {
 
@@ -277,6 +325,7 @@ var Map = function(rows, cols) {
                 } else {
                     this.center = [x, y];
                     this.add_hexes(2);
+                    //this.lock = false;
                 }
 
 
@@ -293,10 +342,12 @@ var Map = function(rows, cols) {
     return this;
 };
 
-var User = function(uid, x, y) {
+var User = function(uid, x, y, img) {
     this.x = x;
     this.y = y;
     this.uid = uid;
+
+    this.img = img;
 
     return this;
 };
@@ -331,6 +382,6 @@ var draw_map = function(el) {
     key('k', function() {map.move(user, 0, -2)});
 
     key('i', function() {
-        user = map.add_user(8, 8)
+        user = map.add_user(8, 8, 'faery');
     });
 }
