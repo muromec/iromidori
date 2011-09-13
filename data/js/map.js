@@ -45,7 +45,7 @@ var Map = function(rows, cols) {
 
     this.rows = rows;
     this.cols = cols;
-    this.center = [Math.round(cols/4)*2, Math.round(rows/4)*2];
+    this.center = [cols/4*2, rows/4*2];
 
     this.lock = true;
     this._waits = 0;
@@ -113,8 +113,8 @@ var Map = function(rows, cols) {
     };
 
     this.add_hexes = function(id) {
-        var cols = this.center[0] + Math.round(this.cols/2),
-            rows = this.center[1] + Math.round(this.rows/2);
+        var cols = this.center[0] + this.cols/2,
+            rows = this.center[1] + this.rows/2;
 
         var start_row = rows - this.rows,
             start_col = cols - this.cols;
@@ -185,6 +185,9 @@ var Map = function(rows, cols) {
     this.recenter = function(x, y) {
         var cx = this.center[0],
             cy = this.center[1];
+
+        x = Math.round(x / 4) * 4;
+        y = Math.round(y / 4) * 4;
 
         var _off_x = cx - x,
             _off_y = cy - y;
@@ -272,7 +275,7 @@ var Map = function(rows, cols) {
                 if(col_n < col_lim) {
                     move(col_n+1);
                 } else {
-                    this.center = [Math.round(x/2)*2, Math.round(y/2)*2];
+                    this.center = [x, y];
                     this.add_hexes(2);
                 }
 
