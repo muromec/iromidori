@@ -21,13 +21,15 @@ var Hex = function(paper, x, y, w, h) {
     hex.free = function() {
        hex.attr("fill", 'green');
        hex.text.show();
+       hex.used = false;
     };
 
     hex.node.onclick = function() {
-       alert(hex.gen);
 
-       hex.use(true);
+       //hex.use(true);
        hex.attr("fill", "blue");
+       console.log(F("click on hex gen {0} at {1}x{2}",[
+                   hex.gen, hex.col, hex.row]));
     }
 
     hex.wtf = 'hex element';
@@ -44,6 +46,9 @@ var Map = function(rows, cols) {
     this.rows = rows;
     this.cols = cols;
     this.center = [Math.round(cols/4)*2, Math.round(rows/4)*2];
+
+    this.lock = true;
+    this._waits = 0;
 
     var shift_x = Math.round(cols/3);
     var shift_y = Math.round(rows/3);
@@ -69,6 +74,11 @@ var Map = function(rows, cols) {
     };
 
     this.move = function(user, o_x, o_y) {
+
+
+        if(this.lock) {
+            return;
+        }
 
         var next = null;
         var old = this.cells[user.x][user.y];
@@ -109,51 +119,66 @@ var Map = function(rows, cols) {
         var start_row = rows - this.rows,
             start_col = cols - this.cols;
 
-        console.log("start_col "+start_col);
+        var draw_row = function(col, row) {
+            var y = ((row-start_row) * HEX_H) + 40, _y = 0;
+            var _row = 0;
 
-        for(var col=start_col; col<cols; col+=2) {
 
-            if((this.cells[col] === undefined)) {
-                    this.cells[col] = [];
-                    console.log("create col " + col);
+            if((col % 4)!=0) {
+                _y = HEX_H;
+                _row = row + 1;
+
+            } else {
+                _y = 0;
+                _row = row;
             }
 
-            for(row=start_row; row<rows; row+=2) {
-                var y = ((row-start_row) * HEX_H) + 40, _y = 0;
-                var _row = 0;
 
+            var hex = this.cells[col][_row];
+            if(hex !== undefined) {
+                return;
+            }
 
-                if((col % 4)!=0) {
-                    _y = HEX_H;
-                    _row = row + 1;
+            //console.log(F("create {0}x{1}", [col, _row]));
 
+            var x = (col-start_col) * HEX_W;
+
+            hex = this.paper.hex(x, y + _y);
+            hex.text = this.paper.text(x + HEX_H + 5, y + _y , Raphael.format("{0}x{1}", [col, _row]));
+            hex.col = col;
+            hex.row = _row;
+
+            this.cells[col][_row] = hex;
+
+            hex.free();
+            hex.gen = id;
+        };
+
+        var draw_col = function(col) {
+            var _draw_col = function() {
+
+                clearInterval(_draw_col.stop);
+
+                if((this.cells[col] === undefined)) {
+                        this.cells[col] = [];
+                        //console.log("create col " + col);
+                }
+
+                for(row=start_row; row<rows; row+=2) {
+                    draw_row(col, row);
+                }
+
+                if(col<cols) {
+                    draw_col(col+2)
                 } else {
-                    _y = 0;
-                    _row = row;
+                    this.lock = false;
                 }
-
-
-                var hex = this.cells[col][_row];
-                if(hex !== undefined) {
-                    hex.show();
-                    continue;
-                }
-
-                console.log(F("create {0}x{1}", [col, _row]));
-
-                var x = (col-start_col) * HEX_W;
-
-                hex = this.paper.hex(x, y + _y);
-                hex.text = this.paper.text(x + HEX_H, y + _y , Raphael.format("{0}x{1}", [col, _row]));
-                hex.col = col;
-                hex.row = _row;
-
-                this.cells[col][_row] = hex;
-
-                hex.free();
-                hex.gen = id;
             }
+
+            _draw_col.stop = window.setInterval(_draw_col);
         }
+
+        draw_col(start_col);
 
     };
 
@@ -176,59 +201,75 @@ var Map = function(rows, cols) {
         if((off_x < shift_x) && (off_y < shift_y))
             return;
 
+        this.lock = true;
+
         var move_x = _off_x * HEX_W,
             move_y = _off_y * HEX_H;
 
-        var col_lim = this.cells.length;
 
-        var move = function(col_n) {
-            var col_off = col_n - x;
+        var move_or_drop = function(col_n, row_n) {
+            var hex = this.cells[col_n][row_n];
+
+            if(hex===undefined)
+                return;
+
+            var col_off = hex.col - x;
 
             if(col_off < 0)
                 col_off = -col_off;
 
             var drop_col = (col_off > shift_x);
 
+            var row_off = hex.row - y;
+            if(row_off <0)
+                row_off = - row_off;
+
+            var drop_row = (row_off > shift_y);
+
+            //console.log(F("hex {0}x{1} drop {2}/{3}", [hex.col, hex.row, drop_col, drop_row]));
+
+
+            if(drop_col || drop_row) {
+
+                this.cells[hex.col][hex.row] = undefined;
+                hex.attr("fill", "black");
+                hex.text.remove();
+                hex.remove();
+
+
+
+                //col.splice(row_n, 1);
+            } else {
+                hex.translate(move_x, move_y);
+                hex.text.translate(move_x, move_y);
+
+                if(hex.used == false)
+                    hex.attr("fill", "yellow");
+
+            }
+
+        };
+
+        var col_lim = x + this.cols/2;
+
+        var move = function(col_n) {
+
             var move_col = function() {
 
                 clearInterval(move_col.stop);
 
                 var col = this.cells[col_n];
+                var start_row = y - this.rows;
+                var end_row = y + this.rows;
 
+                if(col==undefined)
+                    start_row = end_row;
 
-                for(var row_n=0; row_n < col.length; row_n++) {
-
-                    var row_off = row_n - y;
-                    if(row_off <0)
-                        row_off = - row_off;
-
-                    var drop_row = (row_off > shift_y);
-
-                    var hex = col[row_n];
-
-                    if(!hex)
-                        continue;
-
-                    if(drop_col || drop_row) {
-
-                        hex.text.hide()
-                        hex.hide()
-
-                        //col.splice(row_n, 1);
-                    } else {
-                        hex.translate(move_x, move_y);
-                        hex.text.translate(move_x, move_y);
-
-                    }
-
+                for(var row_n=start_row; row_n < end_row; row_n++) {
+                    move_or_drop(col_n, row_n);
                 }
 
-                /*
-                if(drop_col) {
-                    this.cells.splice(col_n, 1);
-                } */
-
-                if(this.cells[col_n+1]) {
+                if(col_n < col_lim) {
                     move(col_n+1);
                 } else {
                     this.center = [Math.round(x/2)*2, Math.round(y/2)*2];
@@ -241,7 +282,7 @@ var Map = function(rows, cols) {
             move_col.stop = window.setInterval(move_col, 0);
         }
 
-        move(0);
+        move(x - this.cols);
 
 
     };
@@ -272,10 +313,10 @@ var draw_map = function(el) {
     var map = Map(rows, cols);
     map.paper = paper;
     map.add_hexes(1);
-    alert(map.center);
+
+    var user = null;
 
 
-    var user = map.add_user(8, 8);
 
     key('l', function() {map.move(user, 2, 1)});
     key('o', function() {map.move(user, 2, -1)});
@@ -286,4 +327,7 @@ var draw_map = function(el) {
     key('j', function() {map.move(user, 0, 2)});
     key('k', function() {map.move(user, 0, -2)});
 
+    key('i', function() {
+        user = map.add_user(8, 8)
+    });
 }
