@@ -11,6 +11,38 @@ var Hex = function(paper, x, y, w, h) {
 
     hex.used = false;
 
+    hex._hl = function(off_x, off_y, color) {
+        var col = this.map.cells[hex.col+off_x];
+        if(col===undefined)
+            return;
+
+        var _hex = col[hex.row+off_y];
+
+        if(_hex === undefined)
+            return;
+
+        if(_hex.used)
+            return;
+
+        if(color===undefined)
+            color=_hex._color;
+
+        _hex._color = _hex.attrs.fill;
+
+        _hex.attr("fill", color);
+
+    };
+
+    hex.halo = function(color) {
+       hex._hl(0, +2, color);
+       hex._hl(0, -2, color);
+       hex._hl(2, +1, color);
+       hex._hl(2, -1, color);
+       hex._hl(-2, +1, color);
+       hex._hl(-2, -1, color);
+
+    };
+
     hex.use = function (whom) {
        hex.attr("fill", 'red');
        hex.text.hide();
@@ -19,6 +51,10 @@ var Hex = function(paper, x, y, w, h) {
 
        if(whom != undefined && whom.img != undefined)
            hex.img = whom.img;
+
+       if(whom!==true)
+           hex.halo('yellow');
+
     };
 
     hex.free = function() {
@@ -26,14 +62,18 @@ var Hex = function(paper, x, y, w, h) {
        hex.text.show();
        hex.used = false;
        hex.img = false;
+
+       hex.halo();
+
     };
 
     hex.node.onclick = function() {
 
-       //hex.use(true);
+       hex.use(true);
        hex.attr("fill", "blue");
        console.log(F("click on hex gen {0} at {1}x{2}",[
                    hex.gen, hex.col, hex.row]));
+
     }
 
     hex.wtf = 'hex element';
@@ -72,6 +112,10 @@ var Map = function(rows, cols) {
             img_o._img = img;
             img_o._sprite_x_off = 0;
             img_o._sprite = 0;
+
+            img_o.node.onclick = function() {
+                alert(img_o._img);
+            }
         }
 
         _img = img_o;
@@ -192,6 +236,7 @@ var Map = function(rows, cols) {
             hex.text = this.paper.text(x + HEX_H + 5, y + _y , Raphael.format("{0}x{1}", [col, _row]));
             hex.col = col;
             hex.row = _row;
+            hex.map = this;
 
             this.cells[col][_row] = hex;
 
@@ -293,9 +338,6 @@ var Map = function(rows, cols) {
 
                 if(hex.img)
                     hex.img.translate(move_x, move_y);
-
-                if(hex.used == false)
-                    hex.attr("fill", "yellow");
 
             }
 
