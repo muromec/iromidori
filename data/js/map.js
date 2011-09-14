@@ -90,6 +90,8 @@ var Hex = function(paper, x, y, w, h) {
 
     hex.wtf = 'hex element';
 
+    hex.attr({stroke: 0x00000000});
+
     return hex;
 
 };
