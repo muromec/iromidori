@@ -61,7 +61,7 @@ var Hex = function(paper, x, y, w, h) {
     };
 
     hex.free = function() {
-       hex.text.show();
+       hex.text.hide();
        hex.used = false;
        hex.img = false;
 
