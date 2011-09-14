@@ -7,9 +7,10 @@ var Hex = function(paper, x, y, w, h) {
     var hex = paper.path(
         Raphael.format(
             "M{0} {1}l{2} {4}l{3} 0l{2} -{4}l-{2} -{4}l-{3} 0z", [x, y, f1, f2, h]));
-    hex.attr("fill", "#fff");
 
     hex.used = false;
+    hex.attrs.x = x;
+    hex.attrs.y = y;
 
     hex._hl = function(off_x, off_y, color) {
         var col = this.map.cells[hex.col+off_x];
@@ -44,7 +45,7 @@ var Hex = function(paper, x, y, w, h) {
     };
 
     hex.use = function (whom) {
-       hex.attr("fill", 'red');
+       //hex.attr("fill", 'red');
        hex.text.hide();
 
        hex.used = whom;
@@ -52,25 +53,36 @@ var Hex = function(paper, x, y, w, h) {
        if(whom != undefined && whom.img != undefined)
            hex.img = whom.img;
 
+       /*
        if(whom!==true)
            hex.halo('yellow');
+           */
 
     };
 
     hex.free = function() {
-       hex.attr("fill", 'green');
        hex.text.show();
        hex.used = false;
        hex.img = false;
 
-       hex.halo();
+       //hex.halo();
+       //
+       __hex = hex;
+
+       hex.back_img = hex.paper.image(
+         F('/img/tile/{0}.png',[hex.back_img_name]),
+               hex.attrs.x, hex.attrs.y - HEX_H,
+               HEX_W_FULL, HEX_H*2
+       );
+       hex.back_img.toBack();
+
 
     };
 
     hex.node.onclick = function() {
 
        hex.use(true);
-       hex.attr("fill", "blue");
+       //hex.attr("fill", "blue");
        console.log(F("click on hex gen {0} at {1}x{2}",[
                    hex.gen, hex.col, hex.row]));
 
@@ -234,6 +246,7 @@ var Map = function(rows, cols) {
 
             hex = this.paper.hex(x, y + _y);
             hex.text = this.paper.text(x + HEX_H + 5, y + _y , Raphael.format("{0}x{1}", [col, _row]));
+            hex.back_img_name = 'grass';
             hex.col = col;
             hex.row = _row;
             hex.map = this;
@@ -327,9 +340,8 @@ var Map = function(rows, cols) {
                 this.cells[hex.col][hex.row] = undefined;
                 hex.attr("fill", "black");
                 hex.text.remove();
+                hex.back_img.remove();
                 hex.remove();
-
-
 
                 //col.splice(row_n, 1);
             } else {
@@ -338,6 +350,9 @@ var Map = function(rows, cols) {
 
                 if(hex.img)
                     hex.img.translate(move_x, move_y);
+
+                if(hex.back_img)
+                    hex.back_img.translate(move_x, move_y);
 
             }
 
@@ -395,6 +410,7 @@ var User = function(uid, x, y, img) {
 };
 
 HEX_W = 21;
+HEX_W_FULL = 60;
 HEX_H = 16;
 
 var draw_map = function(el) {
