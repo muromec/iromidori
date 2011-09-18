@@ -193,7 +193,26 @@ var Map = function(rows, cols) {
                 sprite_x_off = 0;
             }
 
-            user.img.attr("src", F("/img/char/{0}_{1}.png",[user.img._img, sprite]));
+
+            user.gosprite = 0;
+
+            var animate_stop = function(e) {
+                user.img.attr("src", F("/img/char/{0}_{1}.png",[user.img._img, sprite]));
+
+                clearInterval(user.go);
+                user.go = null;
+
+            }
+
+            var animate_go = function(_e) {
+                user.gosprite++;
+                if(user.gosprite > 1) user.gosprite=0;
+
+                user.img.attr("src", F("/img/char/{0}_{1}_go{2}.png",[user.img._img, sprite, user.gosprite]));
+            }
+
+            if(!user.go)
+                user.go = window.setInterval(animate_go, 150);
 
             user.img.animateAlong(F("M{0},{1}L{2},{3}",[
 
@@ -203,8 +222,11 @@ var Map = function(rows, cols) {
                     (next.col * HEX_W)+sprite_x_off,
                     next.row * HEX_H
                     ]), 
-                    100
+                    800,
+                    false,
+                    animate_stop
             );
+
             user.img._sprite_x_off = sprite_x_off;
             user.img._sprite = sprite;
 
