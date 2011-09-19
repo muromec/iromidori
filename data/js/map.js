@@ -266,6 +266,9 @@ var Map = function(rows, cols) {
                 hex.back_img.remove();
                 hex.remove();
 
+                if(hex.used && hex.used.img)
+                    hex.used.img.remove();
+
                 //col.splice(row_n, 1);
             } else {
                 hex.translate(move_x, move_y);
@@ -275,6 +278,9 @@ var Map = function(rows, cols) {
                     hex.img.translate(move_x, move_y);
 
                 if(hex.back_img)
+                    hex.back_img.translate(move_x, move_y);
+
+                if(hex.used && hex.used.img)
                     hex.back_img.translate(move_x, move_y);
 
             }
