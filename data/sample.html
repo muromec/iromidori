@@ -1,14 +1,20 @@
 <html>
     <head>
-        <script type="text/javascript" src="/js/keymaster.min.js" ></script>
-        <script type="text/javascript" src="/js/raphael.js" ></script>
-        <script type="text/javascript" src="/js/map.js" ></script>
-
+        <script type="text/javascript" src="/js/requires.js" ></script>
 
     </head>
     <body>YRRR</body>
 
     <div id="map" />
 
-    <script> draw_map("map"); </script>
+    <script>
+        _m(function() { draw_map("map") } );
+        _m("raphael");
+        _m("keymaster.min");
+        _m("draw");
+        _m("user");
+        _m("hex");
+        _m("map");
+    </script>
+
 </html>
