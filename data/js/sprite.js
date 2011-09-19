@@ -1,16 +1,18 @@
-var Sprite = function(cls, name, x, y, w, h) {
-    var ob = this;
+EMPTY_PNG = "/img/empty.png";
 
-    ob.cls = cls;
-    ob.state = "base";
-    ob.name = name;
-    ob.dir = 0;
-    ob.frames = {
+var Sprite = function(cls, name, x, y, w, h) {
+    image = paper.image(EMPTY_PNG, x, y, w, h);
+
+    image.cls = cls;
+    image.state = "base";
+    image.name = name;
+    image._dir = 0;
+    image.frames = {
         "go": 1,
         "fire": 3,
     }
 
-    var path = function(state) {
+    image.path = function(state) {
         var sprite;
         if (state == "base") {
             sprite = "";
@@ -18,16 +20,16 @@ var Sprite = function(cls, name, x, y, w, h) {
             sprite = "_" + state + image.frame;
 
             image.frame++;
-            if(image.frame > ob.frames[state])
+            if(image.frame > image.frames[state])
                 image.frame = 0;
         }
 
         return F(
             "/img/{0}/{1}_{2}{3}.png",
             [ 
-                ob.cls,
-                ob.name,
-                ob.dir,
+                image.cls,
+                image.name,
+                image._dir,
                 sprite
             ]
         )
@@ -35,16 +37,17 @@ var Sprite = function(cls, name, x, y, w, h) {
 
     }
 
-    image = paper.image(path("base", 0), x, y, w, h);
 
     image.sprite = function(state, frame) {
-        image.attr("src", path(state, frame));
+        image.attr("src", image.path(state, frame));
     }
 
     image.dir = function(dir) {
-        ob.dir = dir;
+        image._dir = dir;
     }
 
     image.frame = 0;
+    image.sprite("base");
+
     return image;
 }
