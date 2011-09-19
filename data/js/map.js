@@ -27,7 +27,7 @@ var Map = function(rows, cols) {
         var img_o = undefined;
 
         if(img !== undefined) {
-            img_o = this.paper.image(F("/img/char/{0}_{1}.png",[img, 0]), x * HEX_W, y * HEX_H, 100, 40);
+            img_o = new Sprite("char", img, x * HEX_W, y * HEX_H, 100, 40);
             img_o._img = img;
             img_o._sprite_x_off = 0;
             img_o._sprite = 0;
@@ -86,34 +86,27 @@ var Map = function(rows, cols) {
         user.y = next.row;
 
         if(user.img != undefined) {
-            var sprite = user.img._sprite,
-                sprite_x_off = user.img._sprite_x_off;
+            var sprite_x_off = user.img._sprite_x_off;
 
             if(o_x > 0) {
-                sprite = 1;
                 sprite_x_off = -30;
+                user.img.dir(1);
 
             } else if (o_x < 0) {
-                sprite = 0;
                 sprite_x_off = 0;
+                user.img.dir(0);
             }
 
 
-            user.gosprite = 0;
-
             var animate_stop = function(e) {
-                user.img.attr("src", F("/img/char/{0}_{1}.png",[user.img._img, sprite]));
+                user.img.sprite("base");
 
                 clearInterval(user.go);
                 user.go = null;
-
             }
 
             var animate_go = function(_e) {
-                user.gosprite++;
-                if(user.gosprite > 1) user.gosprite=0;
-
-                user.img.attr("src", F("/img/char/{0}_{1}_go{2}.png",[user.img._img, sprite, user.gosprite]));
+                user.img.sprite("go");
             }
 
             if(!user.go)
@@ -133,7 +126,8 @@ var Map = function(rows, cols) {
             );
 
             user.img._sprite_x_off = sprite_x_off;
-            user.img._sprite = sprite;
+
+            user.img.sprite("base");
 
             user.img.toFront();
         }

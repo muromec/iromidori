@@ -6,39 +6,17 @@ var User = function(uid, x, y, img) {
     this.img = img;
 
     this.fire = function() {
-        console.log('fire');
-        this.firesprite = 0;
         var user = this;
 
         var animate_fire = function(_e) {
-            console.log("animate fire "+user.firesprite);
+            user.img.sprite("fire");
 
-            user.img.attr("src",
-                    F(
-                        "/img/char/{0}_{1}_fire{2}.png",
-                        [
-                            user.img._img,
-                            user.img._sprite,
-                            user.firesprite
-                        ]
-            ));
-
-            user.firesprite++;
-
-            if(user.firesprite > 3) {
+            if(!user.img.frame) {
                 clearInterval(user._fire);
                 user._fire = null;
-                user.img.attr("src",
-                    F(
-                        "/img/char/{0}_{1}.png", [
-                            user.img._img,
-                            user.img._sprite
-                        ]
-                    )
-                );
+
+                user.img.sprite("base");
             }
-
-
         }
 
         if(!this._fire)
@@ -48,4 +26,3 @@ var User = function(uid, x, y, img) {
 
     return this;
 };
-

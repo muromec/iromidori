@@ -3,7 +3,8 @@ HEX_W_FULL = 60;
 HEX_H = 16;
 
 var draw_map = function(el) {
-    var paper = Raphael(el, 1100, 600);
+    // set global
+    paper = Raphael(el, 1100, 600);
     paper.hex = function(x, y) {
         return new Hex(paper, x, y, HEX_W, HEX_H);
     }
