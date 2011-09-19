@@ -67,8 +67,7 @@ var Hex = function(paper, x, y, w, h) {
        //
        __hex = hex;
 
-       hex.back_img = hex.paper.image(
-         F('/img/tile/{0}.png',[hex.back_img_name]),
+       hex.back_img = new Sprite("tile", hex.back_img_name,
                hex.attrs.x, hex.attrs.y - HEX_H,
                HEX_W_FULL, HEX_H*2
        );
