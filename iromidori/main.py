@@ -18,9 +18,6 @@ def route(request, upd_ctx, **ctx):
 
 def entry(request):
     
-
-    print request.path
-
     ret = chain.run([route], request=request)
     body = ret.get('render')
     code = ret.get('return_code', 202)
@@ -34,18 +31,6 @@ def entry(request):
     request.write("HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\n%s" % (
                          len(message), message))
     request.finish()
-
-    """
-    if isinstance(body, file):
-        for chk in iter(body.read, ""):
-            print chk.__class__, len(chk)
-            request.write(chk)
-    else:
-        request.write(body)
-
-    request.finish()
-    """
-    print 'finish'
 
 if __name__ == '__main__':
     import logging

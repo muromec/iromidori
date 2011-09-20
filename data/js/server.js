@@ -10,12 +10,18 @@ var Server = function() {
     console.log(ws);
 
     ws.onopen = function() {
-        console.log("Opened");
-         ws.send("Hello, world");
+         ws.push({"url": "/enter"})
     };
 
     ws.onmessage = function (evt) {
-         alert(evt.data);
+         var data = JSON.parse(evt.data);
+
+         if(ws.cb)
+             ws.cb(data);
+    };
+
+    ws.push = function(data) {
+        ws.send(JSON.stringify(data));
     };
 
     return ws;

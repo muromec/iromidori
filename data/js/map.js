@@ -20,10 +20,39 @@ var Map = function(rows, cols) {
         this.cells[col] = [];
     }
 
-    this.add_user = function(x, y, img) {
-        this._user++;
+    this.fire = function(_arg) {
+       var user =  this.users[_arg.uid];
+       user.fire();
+    };
 
-        var uid = this._user;
+    this.drop_user = function(_arg) {
+        var user =  this.users[_arg.uid];
+
+        var hex = this.cells[user.x][user.y];
+        hex.free();
+
+        user.img.remove();
+
+        this.users[_arg.uid] = undefined;
+    };
+
+    this.add_user = function(_arg, y, img) {
+        var x ;
+        var uid;
+
+        if (typeof(_arg) == 'object') {
+            x = _arg.x;
+            y = _arg.y;
+            img = _arg.char;
+            uid = _arg.uid;
+        } else {
+            x = _arg;
+            uid = this._user;
+        }
+
+        if(this.users[uid])
+            return;
+
         var img_o = undefined;
 
         if(img !== undefined) {
@@ -44,14 +73,19 @@ var Map = function(rows, cols) {
         this.users[uid] = user;
 
         var hex = this.cells[user.x][user.y];
+        console.log(F("hex: {0}, {1}x{2}",
+                [hex, user.x, user.y]));
         hex.use(user);
 
         return user;
 
     };
 
-    this.move = function(user, o_x, o_y) {
+    this.move = function(_arg, o_x, o_y) {
 
+        var user =  this.users[_arg.uid];
+        o_x = _arg.ox;
+        o_y = _arg.oy;
 
         if(this.lock) {
             return;

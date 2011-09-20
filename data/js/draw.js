@@ -16,24 +16,45 @@ var draw_map = function(el) {
     map.paper = paper;
     map.add_hexes(1);
 
-    var user = null;
-
-    var server = new Server();
-
-
-    key('l', function() {map.move(user, 2, 1)});
-    key('o', function() {map.move(user, 2, -1)});
-
-    key('h', function() {map.move(user, -2, 1)});
-    key('y', function() {map.move(user, -2, -1)});
-
-    key('j', function() {map.move(user, 0, 2)});
-    key('k', function() {map.move(user, 0, -2)});
-
-    key('f', function() {user.fire()});
+    var move = function(ox, oy) {
+        server.push({"ox": ox, "oy": oy, "url": "/move"})
+    };
 
 
-    key('i', function() {
-        user = map.add_user(8, 8, 'faery');
-    });
+    key('l', function() {move(2, 1)});
+    key('o', function() {move(2, -1)});
+
+    key('h', function() {move(-2, 1)});
+    key('y', function() {move(-2, -1)});
+
+    key('j', function() {move(0, 2)});
+    key('k', function() {move(0, -2)});
+
+    key('f', function() {
+        server.push({"url": "/fire"})
+    } );
+
+    var server;
+
+    var connect = function() {
+        server = new Server();
+        server.cb = function(data) {
+            console.log("got "+data.fn);
+            map[data.fn](data.data);
+        }
+    }
+
+    var try_connect = function() {
+        console.log(F("try... {0}", [map.lock]));
+
+        if(map.lock)
+            return;
+
+        clearInterval(try_connect.intr);
+
+        connect();
+    }
+
+    try_connect.intr = setInterval(try_connect, 100);
+
 }
