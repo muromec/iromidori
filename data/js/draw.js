@@ -18,6 +18,7 @@ var draw_map = function(el) {
 
     var user = null;
 
+    var server = new Server();
 
 
     key('l', function() {map.move(user, 2, 1)});
