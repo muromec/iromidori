@@ -67,25 +67,17 @@ var Hex = function(paper, x, y, w, h) {
        //
        __hex = hex;
 
+    };
+
+    hex.draw = function() {
+
        hex.back_img = new Sprite("tile", hex.back_img_name,
                hex.attrs.x, hex.attrs.y - HEX_H,
                HEX_W_FULL, HEX_H*2
        );
        hex.back_img.toBack();
 
-
     };
-
-    hex.node.onclick = function() {
-
-       hex.use(true);
-       //hex.attr("fill", "blue");
-       console.log(F("click on hex gen {0} at {1}x{2}",[
-                   hex.gen, hex.col, hex.row]));
-
-    }
-
-    hex.wtf = 'hex element';
 
     hex.attr({stroke: 0x00000000});
 
