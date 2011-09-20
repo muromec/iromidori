@@ -45,8 +45,6 @@ var draw_map = function(el) {
     }
 
     var try_connect = function() {
-        console.log(F("try... {0}", [map.lock]));
-
         if(map.lock)
             return;
 
