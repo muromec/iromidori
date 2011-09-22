@@ -8,7 +8,10 @@
     <div id="map" />
 
     <script>
-        _m(function() { draw_map("map") } );
+        _m(function() {
+            F = Raphael.format;
+            draw_map("map")
+        } );
         _m("server");
         _m("raphael");
         _m("keymaster.min");
@@ -17,6 +20,8 @@
         _m("hex");
         _m("map");
         _m("sprite");
+        _m("viewport");
+
     </script>
 
 </html>

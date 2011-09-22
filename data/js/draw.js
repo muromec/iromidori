@@ -10,8 +10,22 @@ var draw_map = function(el) {
         col, cols = 32;
 
     var map = Map(rows, cols);
+
+    var vp0 = new ViewPort(map, 0, 0, cols/2, rows/2);
+    vp0.y = 20;
+    vp0.draw();
+    console.log("vp1");
+    vp1 = vp0.right();
+    vp1.draw();
+    console.log("vp2");
+    vp2 = vp0.bottom();
+    vp2.draw();
+    console.log("vp3");
+    vp3 = vp1.bottom();
+    vp3.draw();
+
     map.paper = paper;
-    map.add_hexes(1);
+    //map.add_hexes(1);
 
     var move = function(ox, oy) {
         server.push({"ox": ox, "oy": oy, "url": "/move"})
