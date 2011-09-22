@@ -37,6 +37,34 @@ var Sprite = function(cls, name, x, y, w, h) {
 
     }
 
+    image._cycles = 0;
+
+    image.sprite_cycle = function(state, ms, stop) {
+        image._cycles ++;
+
+        if(image._cycles > 1)
+            return;
+
+        image.sprite(state);
+
+        image._cycle = setInterval(function() {
+            image.sprite(state);
+
+            if(stop != undefined && !image.frame) {
+                image.sprite_cycle_stop();
+                image.sprite(stop);
+            }
+        }, ms);
+    }
+
+    image.sprite_cycle_stop = function() {
+        image._cycles --;
+
+        if(image._cycles > 0)
+            return;
+
+        clearInterval(image._cycle);
+    }
 
     image.sprite = function(state, frame) {
         image.attr("src", image.path(state, frame));

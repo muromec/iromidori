@@ -36,6 +36,10 @@ var Map = function(rows, cols) {
         this.users[_arg.uid] = undefined;
     };
 
+    this.set_self = function(_arg) {
+        this.user_self = _arg.uid;
+    };
+
     this.add_user = function(_arg, y, img) {
         var x ;
         var uid;
@@ -61,9 +65,6 @@ var Map = function(rows, cols) {
             img_o._sprite_x_off = 0;
             img_o._sprite = 0;
 
-            img_o.node.onclick = function() {
-                alert(img_o._img);
-            }
         }
 
         _img = img_o;
@@ -118,6 +119,7 @@ var Map = function(rows, cols) {
 
         user.x = next.col;
         user.y = next.row;
+        user.hex = next;
 
         if(user.img != undefined) {
             var sprite_x_off = user.img._sprite_x_off;
@@ -132,19 +134,7 @@ var Map = function(rows, cols) {
             }
 
 
-            var animate_stop = function(e) {
-                user.img.sprite("base");
-
-                clearInterval(user.go);
-                user.go = null;
-            }
-
-            var animate_go = function(_e) {
-                user.img.sprite("go");
-            }
-
-            if(!user.go)
-                user.go = window.setInterval(animate_go, 150);
+            user.img.sprite_cycle("go", 150);
 
             user.img.animateAlong(F("M{0},{1}L{2},{3}",[
 
@@ -156,7 +146,9 @@ var Map = function(rows, cols) {
                     ]), 
                     800,
                     false,
-                    animate_stop
+                    function() {
+                        user.img.sprite_cycle_stop();
+                    }
             );
 
             user.img._sprite_x_off = sprite_x_off;
@@ -166,7 +158,8 @@ var Map = function(rows, cols) {
             user.img.toFront();
         }
 
-        this.recenter(user.x, user.y);
+        if(this.user_self == user.uid)
+            this.recenter(user.x, user.y);
 
     };
 
@@ -201,8 +194,8 @@ var Map = function(rows, cols) {
 
             var x = (col-start_col) * HEX_W;
 
-            hex = this.paper.hex(x, y + _y);
-            hex.text = this.paper.text(x + HEX_H + 5, y + _y , Raphael.format("{0}x{1}", [col, _row]));
+            hex = new Hex(x, y+_y,  HEX_W, HEX_H);
+
             hex.back_img_name = 'grass';
             hex.col = col;
             hex.row = _row;
@@ -215,32 +208,18 @@ var Map = function(rows, cols) {
             hex.gen = id;
         };
 
-        var draw_col = function(col) {
-            var _draw_col = function() {
-
-                clearInterval(_draw_col.stop);
-
+        for(var col=start_col; col<cols; col+=2) {
                 if((this.cells[col] === undefined)) {
                         this.cells[col] = [];
-                        //console.log("create col " + col);
                 }
 
                 for(row=start_row; row<rows; row+=2) {
                     draw_row(col, row);
                 }
 
-                if(col<cols) {
-                    draw_col(col+2)
-                } else {
-                    this.lock = false;
-                }
-            }
-
-            _draw_col.stop = window.setInterval(_draw_col);
         }
 
-        draw_col(start_col);
-
+        this.lock = false;
     };
 
     this.recenter = function(x, y) {
@@ -296,66 +275,55 @@ var Map = function(rows, cols) {
             if(drop_col || drop_row) {
 
                 this.cells[hex.col][hex.row] = undefined;
-                hex.attr("fill", "black");
-                hex.text.remove();
                 hex.back_img.remove();
 
                 if(hex.used && hex.used.img)
                     hex.used.img.remove();
 
-                hex.remove();
-                //col.splice(row_n, 1);
             } else {
-                hex.translate(move_x, move_y);
-                hex.text.translate(move_x, move_y);
 
-                if(hex.img)
+                if(hex.img) {
                     hex.img.translate(move_x, move_y);
+                    console.log(F("move {0}x{1} img {2}x{3} = {4}",
+                            [hex.col, hex.row,
+                            move_x, move_y,
+                            hex.img._img
+                            ]))
+                }
 
-                if(hex.back_img)
+                if(hex.back_img) {
                     hex.back_img.translate(move_x, move_y);
+
+                }
 
             }
 
         };
 
-        var col_lim = x + this.cols;
+        var col_start = x - this.cols,
+            col_end = x + this.cols,
+            start_row = y - this.rows,
+            end_row = y + this.rows,
+            col_n, row_n;
 
-        var move = function(col_n) {
+        for(col_n=col_start; col_n<col_end; col_n++) {
 
-            var move_col = function() {
+            var col = this.cells[col_n];
 
-                clearInterval(move_col.stop);
-
-                var col = this.cells[col_n];
-                var start_row = y - this.rows;
-                var end_row = y + this.rows;
-
-                if(col==undefined)
-                    start_row = end_row;
-
-                for(var row_n=start_row; row_n < end_row; row_n++) {
-                    move_or_drop(col_n, row_n);
-                }
-
-                if(col_n < col_lim) {
-                    move(col_n+1);
-                } else {
-                    this.center = [x, y];
-                    this.add_hexes(2);
-                    //this.lock = false;
-                }
-
-
+            if(col==undefined) {
+                continue;
             }
 
-            move_col.stop = window.setInterval(move_col, 0);
+            for(row_n=start_row; row_n<end_row; row_n++) {
+                move_or_drop(col_n, row_n);
+            }
+
         }
 
-        move(x - this.cols);
+        this.center = [x, y];
+        this.add_hexes(2);
+    }
 
-
-    };
 
     return this;
 };

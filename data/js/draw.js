@@ -5,9 +5,6 @@ HEX_H = 16;
 var draw_map = function(el) {
     // set global
     paper = Raphael(el, 1100, 600);
-    paper.hex = function(x, y) {
-        return new Hex(paper, x, y, HEX_W, HEX_H);
-    }
 
     var row, rows = 24,
         col, cols = 32;
