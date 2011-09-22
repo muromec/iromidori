@@ -24,8 +24,7 @@ var draw_map = function(el) {
     vp3 = vp1.bottom();
     vp3.draw();
 
-    map.paper = paper;
-    //map.add_hexes(1);
+    map.vp = [vp0, vp1, vp2, vp3];
 
     var move = function(ox, oy) {
         server.push({"ox": ox, "oy": oy, "url": "/move"})
