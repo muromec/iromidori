@@ -30,10 +30,17 @@ subs = Subscribers('main')
 
 class EventSocket(websocket.WebSocketHandler):
     class State(object):
-        pass
+        def __init__(self, cn):
+            self.cn = cn
+
+        def send(self, data):
+            if not isinstance(data, basestring):
+                data = dumps(data)
+
+            self.cn.write_message(data)
 
     def open(self):
-        self.state = self.State()
+        self.state = self.State(self)
 
         subs.add(self)
 
@@ -44,4 +51,3 @@ class EventSocket(websocket.WebSocketHandler):
     def on_close(self):
         subs.drop(self)
         evapi(msg={"url": "/out"}, group=subs, who=self.state)
-

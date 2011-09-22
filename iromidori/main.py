@@ -34,7 +34,7 @@ def entry(request):
 
 if __name__ == '__main__':
     import logging
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
     application = web.Application([
             (r"/events", EventSocket),

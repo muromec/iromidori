@@ -18,6 +18,9 @@ def enter(who, group, **kw):
             }
         })
 
+    who.send({"fn": "set_self", "data":{
+        "uid": who.uid}})
+
 
 @view(url="/out")
 def out(who, group, **kw):
