@@ -10,3 +10,18 @@ def char_list(**kw):
             "chars": CHARS,
     }
     return dumps(ret), None
+
+TILES = [
+        "grass",
+        "magma",
+        "water_e",
+        "stone_h",
+]
+
+@view(url="/info/tile.list")
+@upd_ctx('json')
+def tile_list(**kw):
+    ret = {
+            "tiles": TILES,
+    }
+    return dumps(ret), None

@@ -57,7 +57,7 @@ var ViewPort = function(map, col, row, w, h) {
 
         var hex = new Hex(x + vp.x, y + vp.y, HEX_W, HEX_H);
 
-        hex.back_img_name = 'grass';
+        hex.back_img_name = 'magma';
         hex.row = row;
         hex.col = col;
         hex.map = vp.map;
@@ -69,6 +69,28 @@ var ViewPort = function(map, col, row, w, h) {
 
         hex.draw();
         hex.free();
+
+        hex.back_img.node.onclick = function() {
+            vp.click_hex(hex);
+        }
+
+    }
+
+    vp.click_hex = function(hex) {
+
+        if(vp.map.changer === undefined) {
+            vp.map.changer = MapChanger();
+            vp.map.changer.show();
+            return;
+        }
+
+        if(!vp.map.changer.current) {
+            alert("select tile");
+            return;
+        }
+
+        hex.back_img.name = vp.map.changer.current;
+        hex.back_img.sprite("base");
 
     }
 
