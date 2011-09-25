@@ -4,6 +4,7 @@ from uuid import uuid4
 CHARS = [
         "faery",
         "deadly",
+        "magma",
 ]
 
 @view(url='/enter')
