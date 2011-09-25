@@ -15,22 +15,17 @@ def route(request, upd_ctx, **ctx):
 
     return [static]
 
+class ApiHandler(web.RequestHandler):
+    def get(self):
+        from iromidori.evapi import route
+        kw = {
+                "request": self.request,
+                "url": self.request.path[4:], # XXX!
+        }
+        ret = chain.run([route], **kw)
+        json = ret.get('json') or "Nani-Nani"
+        self.write(json)
 
-def entry(request):
-    
-    ret = chain.run([route], request=request)
-    body = ret.get('render')
-    code = ret.get('return_code', 202)
-    headers = ret.get('headers')
-
-    content_type = ret.get('content_type', 'text/html; charset=utf-8')
-
-    request.write("HTTP/1.0 200 OK\r\n\r\n")
-
-    message = "You requested %s\n" % request.uri
-    request.write("HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\n%s" % (
-                         len(message), message))
-    request.finish()
 
 if __name__ == '__main__':
     import logging
@@ -38,7 +33,8 @@ if __name__ == '__main__':
 
     application = web.Application([
             (r"/events", EventSocket),
-            (r"/(.*(png|js|html))", web.StaticFileHandler, {"path": "./data/"}),
+            (r"/api/.*", ApiHandler),
+            (r"/(.*(png|js|html|css))", web.StaticFileHandler, {"path": "./data/"}),
     ])
     http_server = HTTPServer(application)
     http_server.listen(31574)

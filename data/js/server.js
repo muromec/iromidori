@@ -8,9 +8,13 @@ var Server = function() {
 
     var ws = new WebSocket(F("ws://{0}/events", [domain]));
     console.log(ws);
+    ws.queue = [];
 
     ws.onopen = function() {
-         ws.push({"url": "/enter"})
+        while(ws.queue.length && ws.readyState == ws.OPEN) {
+            ws.push(ws.queue.pop())
+        }
+
     };
 
     ws.onmessage = function (evt) {
@@ -21,7 +25,11 @@ var Server = function() {
     };
 
     ws.push = function(data) {
-        ws.send(JSON.stringify(data));
+        if(ws.readyState == ws.OPEN) {
+            return ws.send(JSON.stringify(data));
+        }
+
+        ws.queue.push(data);
     };
 
     return ws;

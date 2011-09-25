@@ -2,7 +2,7 @@ from simplejson import loads
 from biribiri.chain.utils import match, upd_ctx
 from biribiri import chain
 
-from iromidori.api import state, move
+from iromidori.api import state, move, info
 
 def evapi(**kw):
     return chain.run([parse, route], **kw)
@@ -24,4 +24,5 @@ def route(**kw):
             state.out,
             state.fire,
             move.move,
+            info.char_list,
     ]

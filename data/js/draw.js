@@ -4,7 +4,7 @@ HEX_H = 16;
 
 var draw_map = function(el) {
     // set global
-    paper = Raphael(el, 1100, 600);
+    paper = Raphael(el, 800, 600);
 
     var row, rows = 24,
         col, cols = 32;
@@ -44,25 +44,16 @@ var draw_map = function(el) {
         server.push({"url": "/fire"})
     } );
 
-    var server;
-
-    var connect = function() {
-        server = new Server();
-        server.cb = function(data) {
-            console.log("got "+data.fn);
-            map[data.fn](data.data);
-        }
+    var server = new Server();
+    server.cb = function(data) {
+        console.log("got "+data.fn);
+        map[data.fn](data.data);
+    }
+    var enter_now = function(char_data) {
+        server.push({"url": "/enter", "char_type": char_data.type});
     }
 
-    var try_connect = function() {
-        if(map.lock)
-            return;
-
-        clearInterval(try_connect.intr);
-
-        connect();
-    }
-
-    try_connect.intr = setInterval(try_connect, 100);
+    var enter = EnterControl(enter_now);
+    enter.fetch();
 
 }
