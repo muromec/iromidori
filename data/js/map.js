@@ -154,8 +154,6 @@ var Map = function(rows, cols) {
 
             user.img._sprite_x_off = sprite_x_off;
 
-            user.img.sprite("base");
-
             user.img.toFront();
         }
 

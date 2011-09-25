@@ -50,9 +50,8 @@ var Sprite = function(cls, name, x, y, w, h) {
         image._cycle = setInterval(function() {
             image.sprite(state);
 
-            if(stop != undefined && !image.frame) {
+            if(stop && !image.frame) {
                 image.sprite_cycle_stop();
-                image.sprite(stop);
             }
         }, ms);
     }
@@ -64,10 +63,13 @@ var Sprite = function(cls, name, x, y, w, h) {
             return;
 
         clearInterval(image._cycle);
+
+        image.sprite("base");
     }
 
-    image.sprite = function(state, frame) {
-        image.attr("src", image.path(state, frame));
+    image.sprite = function(state) {
+        console.log("sprite "+state);
+        image.attr("src", image.path(state));
     }
 
     image.dir = function(dir) {

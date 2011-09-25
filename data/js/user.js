@@ -9,7 +9,7 @@ var User = function(uid, x, y, img) {
 
     this.fire = function() {
 
-        user.img.sprite_cycle("fire", 300, "base");
+        user.img.sprite_cycle("fire", 300, true);
 
     };
 
