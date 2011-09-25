@@ -1,12 +1,6 @@
 from biribiri.chain.utils import view
 from uuid import uuid4
 
-CHARS = [
-        "faery",
-        "deadly",
-        "magma",
-]
-
 @view(url='/enter')
 def enter(who, group, char_type, **kw):
     who.x = 8

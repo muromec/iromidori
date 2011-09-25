@@ -56,7 +56,13 @@ var Map = function(rows, cols) {
         var img_o = undefined;
 
         if(img !== undefined) {
-            img_o = new Sprite("char", img, x * HEX_W, y * HEX_H, 100, 40);
+            var char_w = 100,
+                char_h = 40;
+
+            if(img=="goldy")
+                char_h = 100;
+
+            img_o = new Sprite("char", img, x * HEX_W, y * HEX_H, char_w, char_h);
             img_o._img = img;
             img_o._sprite_x_off = 0;
             img_o._sprite = 0;

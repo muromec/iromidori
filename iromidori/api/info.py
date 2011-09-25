@@ -1,7 +1,12 @@
 from biribiri.chain.utils import view, upd_ctx
 from simplejson import dumps
 
-from .state import CHARS
+CHARS = [
+        "faery",
+        "deadly",
+        "magma",
+        "goldy",
+]
 
 @view(url="/info/char.list")
 @upd_ctx('json')
