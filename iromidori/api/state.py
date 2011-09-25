@@ -6,6 +6,7 @@ def enter(who, group, char_type, **kw):
     who.x = 8
     who.y = 8
     who.uid = str(uuid4())
+    who.char = char_type
 
     for cn in group.subs:
         group.send({
@@ -13,7 +14,7 @@ def enter(who, group, char_type, **kw):
             "data": {
                 "x": cn.state.x,
                 "y": cn.state.y,
-                "char": char_type,
+                "char": cn.state.char,
                 "uid": cn.state.uid,
             }
         })

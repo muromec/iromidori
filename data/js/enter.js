@@ -22,7 +22,6 @@ var EnterControl = function(cb) {
             var name = ec.charlist[i];
 
             chr.text(name);
-            console.log(chr);
 
             ec.dialog.append(chr);
 

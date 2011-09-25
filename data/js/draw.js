@@ -50,6 +50,7 @@ var draw_map = function(el) {
         map[data.fn](data.data);
     }
     var enter_now = function(char_data) {
+        server.connect();
         server.push({"url": "/enter", "char_type": char_data.type});
     }
 

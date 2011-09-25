@@ -6,18 +6,31 @@ var Server = function() {
     var domain = path.substr(start+3, end-start-3);
     console.log(domain);
 
-    var ws = new WebSocket(F("ws://{0}/events", [domain]));
-    console.log(ws);
+    var ws = this;
+
+    ws.connect = function() {
+        if(ws.s) {
+            console.log("already connected. wtf?");
+            return;
+        }
+
+        ws.s = new WebSocket(F("ws://{0}/events", [domain]));
+        ws.s.onmessage = onmessage;
+        ws.s.onopen = onopen;
+    }
+
     ws.queue = [];
 
-    ws.onopen = function() {
-        while(ws.queue.length && ws.readyState == ws.OPEN) {
+    var onopen = function() {
+        console.log("onopen");
+
+        while(ws.queue.length && ws.s && ws.s.readyState == WebSocket.OPEN) {
             ws.push(ws.queue.pop())
         }
 
     };
 
-    ws.onmessage = function (evt) {
+    var onmessage = function (evt) {
          var data = JSON.parse(evt.data);
 
          if(ws.cb)
@@ -25,12 +38,15 @@ var Server = function() {
     };
 
     ws.push = function(data) {
-        if(ws.readyState == ws.OPEN) {
-            return ws.send(JSON.stringify(data));
+        if(ws.s && ws.s.readyState == WebSocket.OPEN) {
+            return ws.s.send(JSON.stringify(data));
         }
 
         ws.queue.push(data);
     };
+
+
+    __server = ws;
 
     return ws;
 }
