@@ -32,6 +32,16 @@ var Hex = function(x, y, w, h) {
 
     };
 
+    hex.move = function(off_x, off_y) {
+        hex.back_img.translate(off_x, off_y);
+
+        if(!hex.img)
+            return;
+
+        hex.img.translate(off_x, off_y);
+
+    };
+
     hex.hide = function() { hex.back_img.hide(); }
     hex.show = function() { hex.back_img.show(); }
 

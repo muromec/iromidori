@@ -14,15 +14,19 @@ var draw_map = function(el) {
     var vp0 = new ViewPort(map, 0, 0, cols/2, rows/2);
     vp0.y = 20;
     vp0.draw();
+    vp0.id = 0;
     console.log("vp1");
     vp1 = vp0.right();
     vp1.draw();
+    vp1.id = 1;
     console.log("vp2");
     vp2 = vp0.bottom();
     vp2.draw();
+    vp2.id = 2;
     console.log("vp3");
     vp3 = vp1.bottom();
     vp3.draw();
+    vp3.id = 3;
 
     map.vp = [vp0, vp1, vp2, vp3];
 

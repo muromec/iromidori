@@ -68,7 +68,6 @@ var Sprite = function(cls, name, x, y, w, h) {
     }
 
     image.sprite = function(state) {
-        console.log("sprite "+state);
         image.attr("src", image.path(state));
     }
 

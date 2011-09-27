@@ -12,10 +12,6 @@ var Map = function(rows, cols) {
     var shift_x = Math.round(cols/3);
     var shift_y = Math.round(rows/3);
 
-    for(col=0;col<cols;col++) {
-        this.cells[col] = [];
-    }
-
     this.fire = function(_arg) {
        var user =  this.users[_arg.uid];
        user.fire();
@@ -157,6 +153,61 @@ var Map = function(rows, cols) {
             user.img.toFront();
         }
 
+        if(next.vp != old.vp) {
+            this.recenter(next.vp, old.vp);
+        }
+
+    };
+
+    this.recenter = function(next, old) {
+        console.log("recenter");
+
+        var to_drop = [false, false, false, false],
+            move_dir = 0;
+
+
+        if(next.row > old.row) {
+            console.log("move down");
+            to_drop[0] = true;
+            to_drop[1] = true;
+            move_dir += 2;
+        } else if(next.row < old.row) {
+            console.log("move up");
+            to_drop[2] = true;
+            to_drop[3] = true;
+            move_dir -= 2;
+        } else if(next.col > old.col) {
+            console.log("move right");
+            to_drop[0] = true;
+            to_drop[2] = true;
+            move_dir += 1;
+        } else if(next.col < old.col) {
+            console.log("move left");
+            to_drop[1] = true;
+            to_drop[3] = true;
+            move_dir -= 1;
+        }
+
+        to_drop[next.id] = false;
+
+        console.log(F("move dir {0}", [move_dir]));
+
+        for(var id=0; id<4; id++) {
+
+            var vp = this.vp[id], _vp;
+            if(to_drop[id] == true) {
+                vp.hide();
+                continue;
+            }
+
+            console.log(F("move {0}", [id]));
+            _vp = vp.move(move_dir);
+            _vp.draw();
+
+            this.vp[vp.id] = vp;
+            this.vp[_vp.id] = _vp;
+
+        }
     };
 
     return this;
