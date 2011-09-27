@@ -147,6 +147,8 @@ var ViewPort = function(map, col, row, w, h) {
         new_vp.id = vp.id;
 
         vp.id -= dir;
+        vp.x += off_x * HEX_W;
+        vp.y += off_y * HEX_H;
 
         return new_vp;
     }
