@@ -168,11 +168,8 @@ var ViewPort = function(map, col, row, w, h) {
             hex.move(off_x * HEX_W, off_y * HEX_H);
         }
 
-        console.log(F("replace vp {0}/{1} {2}/{3}", [
-                    vp.col - off_x, off_x,
-                    vp.row - off_y, off_y]));
         // replace
-        var new_vp = vp.at_off(off_x, off_y);
+        var new_vp = vp.at_off(-off_x, -off_y);
 
         new_vp.x = vp.x;
         new_vp.y = vp.y;
