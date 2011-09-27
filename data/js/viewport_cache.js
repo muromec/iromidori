@@ -9,6 +9,11 @@ var VPCache = function() {
         vpc.cache[F("{0}x{1}", [col, row])] = data;
     }
     vpc.prefetch = function(col, row, cb) {
+        var key = F("{0}x{1}", [col, row]);
+        if(key in vpc.cache)
+            return;
+
+        vpc.cache[key] = undefined;
         var opt = {
             col: col,
             row: row,

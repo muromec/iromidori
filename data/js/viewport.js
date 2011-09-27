@@ -13,8 +13,14 @@ var ViewPort = function(map, col, row, w, h) {
     vp.map = map;
 
     vp.hexes = [];
+    vp.around = new Object();
 
     vp.at_off = function(off_x, off_y) {
+        var key = F("{0}x{1}", [off_x, off_y]);
+
+        if(key in vp.around)
+            return vp.around[key];
+
         var new_vp = new ViewPort(vp.map,
                 vp.col + off_x, vp.row + off_y,
                 vp.w, vp.h
@@ -22,6 +28,8 @@ var ViewPort = function(map, col, row, w, h) {
 
         new_vp.x = vp.x + (off_x * HEX_W);
         new_vp.y = vp.y + (off_y * HEX_H);
+
+        vp.around[key] = new_vp;
 
         return new_vp;
     }
@@ -35,11 +43,14 @@ var ViewPort = function(map, col, row, w, h) {
     }
 
     vp.draw = function() {
+        if(vp._drawed == true)
+            return vp.show();
+
+        console.log(F("draw vp.col={0}, w={1}, vp.row={2}, h={3}", [vp.col, vp.w, vp.row, vp.h]));
+
         var col, row;
         vp._cache = vp.map.vpc.get_vp(vp.col, vp.row);
         vp.tiles = vp._cache.vp;
-
-        console.log(F("draw vp.col={0}, w={1}, vp.row={2}, h={3}", [vp.col, vp.w, vp.row, vp.h]));
 
         for(col=vp.col; col<(vp.col+vp.w) ;col+=2) {
             if(vp.map.cells[col] === undefined)
@@ -49,6 +60,8 @@ var ViewPort = function(map, col, row, w, h) {
                 vp.draw_hex(col, row);
             }
         }
+
+        vp._drawed = true;
     }
 
     vp.draw_hex = function(col, row) {
@@ -64,7 +77,7 @@ var ViewPort = function(map, col, row, w, h) {
 
         var hex = new Hex(x + vp.x, y + vp.y, HEX_W, HEX_H);
 
-        hex.back_img_name = vp.tiles[_col][_row];
+        hex.back_img_name = vp.tiles[_col >> 1][_row >> 1];
         hex.row = row;
         hex.col = col;
         hex.map = vp.map;
@@ -77,19 +90,23 @@ var ViewPort = function(map, col, row, w, h) {
         hex.draw();
         hex.free();
 
-        hex.back_img.node.onclick = function() {
-            vp.click_hex(hex);
+        hex.back_img.node.onclick = function(e) {
+            console.log(F("hex: {0}x{1} in vp{2}=vp{3}",
+                    [hex.col, hex.row, hex.vp.id, vp.id]));
+            vp.click_hex(hex, e.button);
         }
 
     }
 
-    vp.click_hex = function(hex) {
+    vp.click_hex = function(hex, button) {
 
         if(vp.map.changer === undefined) {
             vp.map.changer = MapChanger();
             vp.map.changer.show();
             return;
         }
+
+        vp.map.changer.current_vp = vp;
 
         if(!vp.map.changer.current) {
             alert("select tile");
@@ -99,6 +116,14 @@ var ViewPort = function(map, col, row, w, h) {
         hex.back_img.name = vp.map.changer.current;
         hex.back_img.sprite("base");
 
+        if(button!=0) {
+            vp.foreach(function(hex) {
+                hex.back_img.name = vp.map.changer.current;
+                hex.back_img.sprite("base");
+            })
+        }
+
+
     }
 
     vp.hide = function() {
@@ -106,6 +131,22 @@ var ViewPort = function(map, col, row, w, h) {
             var hex=vp.hexes[id];
 
             hex.hide();
+        }
+    }
+
+    vp.show = function() {
+        console.log("show "+vp.id);
+
+        for(var id=0; id<vp.hexes.length; id++) {
+            var hex=vp.hexes[id];
+
+            hex.show();
+        }
+    }
+
+    vp.foreach = function(f) {
+        for(var id=0; id<vp.hexes.length; id++) {
+            f(vp.hexes[id])
         }
     }
 
@@ -127,19 +168,12 @@ var ViewPort = function(map, col, row, w, h) {
             hex.move(off_x * HEX_W, off_y * HEX_H);
         }
 
-        ViewPort._tile ++;
-
-        if(ViewPort._tile >= vp.tiles.length) ViewPort._tile=0;
-
-
         console.log(F("replace vp {0}/{1} {2}/{3}", [
                     vp.col - off_x, off_x,
                     vp.row - off_y, off_y]));
         // replace
-        var new_vp = new ViewPort(vp.map,
-                vp.col - off_x, vp.row - off_y,
-                vp.w, vp.h
-        );
+        var new_vp = vp.at_off(off_x, off_y);
+
         new_vp.x = vp.x;
         new_vp.y = vp.y;
         new_vp.id = vp.id;
@@ -165,7 +199,23 @@ var ViewPort = function(map, col, row, w, h) {
         vpc.prefetch(vp.col-vp.w, 0);
     }
 
+    vp.get_tiles = function() {
+        var ret = [],
+            col = [];
+
+        vp.foreach(function(hex) {
+
+            col.push(hex.back_img.name);
+
+            if(col.length == vp.h/2) {
+                ret.push(col);
+                col = [];
+            }
+
+        })
+
+        return ret;
+    };
+
     return vp;
 }
-
-ViewPort._tile = 0;

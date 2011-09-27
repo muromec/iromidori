@@ -40,6 +40,11 @@ var draw_map = function(el) {
         server.push({"ox": ox, "oy": oy, "url": "/move"})
     };
 
+    vp4 = vp1.right();
+    map.vpc.prefetch(vp4.col, vp4.row, function() {
+        vp4.draw()
+    })
+
 
     key('l', function() {move(2, 1)});
     key('o', function() {move(2, -1)});
@@ -49,6 +54,11 @@ var draw_map = function(el) {
 
     key('j', function() {move(0, 2)});
     key('k', function() {move(0, -2)});
+
+    key("up", function() {map.recenter(-2)});
+    key("down", function() {map.recenter(2)});
+    key("left", function() {map.recenter(-1)});
+    key("right", function() {map.recenter(1)});
 
     key('f', function() {
         server.push({"url": "/fire"})

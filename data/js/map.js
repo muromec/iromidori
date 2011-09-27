@@ -153,44 +153,34 @@ var Map = function(rows, cols) {
             user.img.toFront();
         }
 
-        if(next.vp != old.vp) {
-            this.recenter(next.vp, old.vp);
-        }
-
     };
 
-    this.recenter = function(next, old) {
+    this.recenter = function(move_dir) {
         console.log("recenter");
 
-        var to_drop = [false, false, false, false],
-            move_dir = 0;
+        var to_drop = [false, false, false, false];
 
 
-        if(next.row > old.row) {
+        if(move_dir==2) {
             console.log("move down");
             to_drop[0] = true;
             to_drop[1] = true;
-            move_dir += 2;
-        } else if(next.row < old.row) {
+        } else if(move_dir==-2) {
             console.log("move up");
             to_drop[2] = true;
             to_drop[3] = true;
-            move_dir -= 2;
-        } else if(next.col > old.col) {
+        } else if(move_dir==1) {
             console.log("move right");
             to_drop[0] = true;
             to_drop[2] = true;
-            move_dir += 1;
-        } else if(next.col < old.col) {
+        } else if(move_dir==-1) {
             console.log("move left");
             to_drop[1] = true;
             to_drop[3] = true;
-            move_dir -= 1;
         }
 
-        to_drop[next.id] = false;
-
         console.log(F("move dir {0}", [move_dir]));
+        var map_vp = [];
 
         for(var id=0; id<4; id++) {
 
@@ -205,10 +195,11 @@ var Map = function(rows, cols) {
             _vp.draw();
             _vp.prefetch_around();
 
-            this.vp[vp.id] = vp;
-            this.vp[_vp.id] = _vp;
-
+            map_vp[vp.id] = vp;
+            map_vp[_vp.id] = _vp;
         }
+
+        this.vp = map_vp;
     };
 
     return this;

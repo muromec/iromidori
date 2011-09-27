@@ -5,6 +5,8 @@ from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado import web
 
+from simplejson import loads
+
 from biribiri import chain
 
 from iromidori.static import serve as static
@@ -17,15 +19,22 @@ def route(request, upd_ctx, **ctx):
 
 class ApiHandler(web.RequestHandler):
     def get(self):
+        return self.chain(self.request.arguments)
+
+    def chain(self, args):
         from iromidori.evapi import route
         kw = {
                 "request": self.request,
                 "url": self.request.path[4:], # XXX!
         }
-        kw.update(self.request.arguments)
+        kw.update(args)  # XXX: insecure!
         ret = chain.run([route], **kw)
         json = ret.get('json') or "Nani-Nani"
         self.write(json)
+
+    def post(self):
+        json = self.request.arguments.get("data")
+        return self.chain(loads(json[0]))
 
 
 if __name__ == '__main__':
