@@ -24,6 +24,7 @@ def route(**kw):
             state.out,
             state.fire,
             move.move,
+            move.vp,
             info.char_list,
             info.tile_list,
     ]

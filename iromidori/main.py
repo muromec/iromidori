@@ -22,6 +22,7 @@ class ApiHandler(web.RequestHandler):
                 "request": self.request,
                 "url": self.request.path[4:], # XXX!
         }
+        kw.update(self.request.arguments)
         ret = chain.run([route], **kw)
         json = ret.get('json') or "Nani-Nani"
         self.write(json)

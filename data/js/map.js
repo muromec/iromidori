@@ -203,6 +203,7 @@ var Map = function(rows, cols) {
             console.log(F("move {0}", [id]));
             _vp = vp.move(move_dir);
             _vp.draw();
+            _vp.prefetch_around();
 
             this.vp[vp.id] = vp;
             this.vp[_vp.id] = _vp;

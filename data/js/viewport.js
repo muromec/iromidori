@@ -13,12 +13,6 @@ var ViewPort = function(map, col, row, w, h) {
     vp.map = map;
 
     vp.hexes = [];
-    vp.tiles = [
-        "magma",
-        "grass",
-        "stone_h",
-        "water_e",
-    ];
 
     vp.at_off = function(off_x, off_y) {
         var new_vp = new ViewPort(vp.map,
@@ -42,6 +36,8 @@ var ViewPort = function(map, col, row, w, h) {
 
     vp.draw = function() {
         var col, row;
+        vp._cache = vp.map.vpc.get_vp(vp.col, vp.row);
+        vp.tiles = vp._cache.vp;
 
         console.log(F("draw vp.col={0}, w={1}, vp.row={2}, h={3}", [vp.col, vp.w, vp.row, vp.h]));
 
@@ -60,13 +56,15 @@ var ViewPort = function(map, col, row, w, h) {
         if((col % 4) != 0) {
             row++;
         }
+        var _col = col - vp.col,
+            _row = row - vp.row;
 
-        var x = (col - vp.col) * HEX_W;
-        var y = (row - vp.row) * HEX_H;
+        var x = _col * HEX_W;
+        var y = _row * HEX_H;
 
         var hex = new Hex(x + vp.x, y + vp.y, HEX_W, HEX_H);
 
-        hex.back_img_name = vp.tiles[ViewPort._tile];
+        hex.back_img_name = vp.tiles[_col][_row];
         hex.row = row;
         hex.col = col;
         hex.map = vp.map;
@@ -151,6 +149,20 @@ var ViewPort = function(map, col, row, w, h) {
         vp.y += off_y * HEX_H;
 
         return new_vp;
+    }
+
+    vp.prefetch_around = function() {
+        var vpc = vp.map.vpc;
+
+        vpc.prefetch(vp.col+vp.w, vp.row+vp.h);
+        vpc.prefetch(vp.col+vp.w, vp.row-vp.h);
+        vpc.prefetch(vp.col-vp.w, vp.row+vp.h);
+        vpc.prefetch(vp.col-vp.w, vp.row-vp.h);
+
+        vpc.prefetch(0, vp.row+vp.h);
+        vpc.prefetch(0, vp.row-vp.h);
+        vpc.prefetch(vp.col+vp.w, 0);
+        vpc.prefetch(vp.col-vp.w, 0);
     }
 
     return vp;
