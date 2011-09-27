@@ -40,11 +40,6 @@ var draw_map = function(el) {
         server.push({"ox": ox, "oy": oy, "url": "/move"})
     };
 
-    vp4 = vp1.right();
-    map.vpc.prefetch(vp4.col, vp4.row, function() {
-        vp4.draw()
-    })
-
 
     key('l', function() {move(2, 1)});
     key('o', function() {move(2, -1)});
