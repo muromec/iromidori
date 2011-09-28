@@ -1,6 +1,6 @@
 PY_VER  = $(shell python -V 2>&1 | cut -f 2 -d ' ' | cut -f 1 -d .)
 
-export PATH+=/sbin:/usr/sbin
+P=/sbin:/usr/sbin:$(PATH)
 
 ifeq ($(PY_VER), 3)
     PYTHON=python2
@@ -32,8 +32,8 @@ install:
 	cp ./ $(D) -a
 
 reload:
-	env PATH=$(PATH) start-stop-daemon --pidfile $(PID) --stop 
-	env PATH=$(PATH) start-stop-daemon --pidfile $(PID) \
+	env PATH=$(P) start-stop-daemon --pidfile $(PID) --stop 
+	env PATH=$(P) start-stop-daemon --pidfile $(PID) \
 	    -b  -m  \
 	    -S -x $(D)/bin/py  $(D)/iromidori/main.py
 # force
