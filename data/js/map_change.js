@@ -9,6 +9,7 @@ var MapChanger = function() {
             return;
 
         mc.container = $("<div>");
+        mc.container.addClass("tiles");
 
         $("body").append(mc.container);
 

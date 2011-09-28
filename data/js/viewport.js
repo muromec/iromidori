@@ -13,6 +13,7 @@ var ViewPort = function(map, col, row, w, h) {
     vp.map = map;
 
     vp.hexes = [];
+    vp.hidden = false;
 
     var key = F("{0}x{1}", [vp.col, vp.row]);
     map.vpc.around[key] = vp;
@@ -48,7 +49,7 @@ var ViewPort = function(map, col, row, w, h) {
         if(vp._drawed == true)
             return vp.show(_id);
 
-        console.log(F("draw vp.col={0}, w={1}, vp.row={2}, h={3}", [vp.col, vp.w, vp.row, vp.h]));
+        console.log(F("draw vp.col={0}, x={1}, vp.row={2}, y={3}", [vp.col, vp.x, vp.row, vp.y]));
 
         var col, row;
         vp._cache = vp.map.vpc.get_vp(vp.col, vp.row);
@@ -136,6 +137,7 @@ var ViewPort = function(map, col, row, w, h) {
             hex.hide();
         }
         vp._id = vp.id;
+        vp.hidden = true;
     }
 
     vp.show = function(_id) {
@@ -145,6 +147,7 @@ var ViewPort = function(map, col, row, w, h) {
             hex.show();
 
         }
+        vp.hidden = false;
     }
 
     vp.foreach = function(f) {
@@ -153,7 +156,7 @@ var ViewPort = function(map, col, row, w, h) {
         }
     }
 
-    vp.move = function(dir) {
+    vp.move = function(dir, skip_new) {
         var off_x=0, off_y=0;
         console.log(F("move {0} dir {1} ", [vp.key, dir]));
 
@@ -161,9 +164,9 @@ var ViewPort = function(map, col, row, w, h) {
             off_x = vp.w;
         if(dir==1)
             off_x = -vp.w;
-        if(dir==-2)
+        if(dir==-vp.map.width)
             off_y = vp.h;
-        if(dir==2)
+        if(dir==vp.map.width)
             off_y = -vp.h;
 
         for(var id=0; id<vp.hexes.length; id++) {
@@ -173,15 +176,20 @@ var ViewPort = function(map, col, row, w, h) {
         }
 
         // replace
-        var new_vp = vp.at_off(-off_x, -off_y);
+        if(!skip_new) {
+            var new_vp = vp.at_off(-off_x, -off_y);
 
-        new_vp.x = vp.x;
-        new_vp.y = vp.y;
-        new_vp.id = vp.id;
+            new_vp.x = vp.x;
+            new_vp.y = vp.y;
+            new_vp.id = vp.id;
+        }
+
 
         vp.id -= dir;
         vp.x += off_x * HEX_W;
         vp.y += off_y * HEX_H;
+
+
 
         return new_vp;
     }

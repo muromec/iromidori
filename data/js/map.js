@@ -5,7 +5,9 @@ var Map = function(rows, cols) {
 
     this.rows = rows;
     this.cols = cols;
-    this.center = [cols/4*2, rows/4*2];
+
+    this.width = Math.ceil(window.innerWidth/(cols/2)/HEX_W);
+    this.height = Math.ceil(window.innerHeight/(rows/2)/HEX_H);
 
     this._waits = 0;
 
@@ -158,45 +160,64 @@ var Map = function(rows, cols) {
     this.recenter = function(move_dir) {
         console.log("recenter");
 
-        var to_drop = [false, false, false, false];
+        var to_drop = [],
+            new_draw = [];
 
 
-        if(move_dir==2) {
+        if(move_dir==this.width) {
             console.log("move down");
-            to_drop[0] = true;
-            to_drop[1] = true;
-        } else if(move_dir==-2) {
+            for(var id=0; id<this.width; id++) {
+                to_drop[id] = true;
+                new_draw[this.vp.length - 1 - id] = true;
+            }
+
+        } else if(move_dir==-this.width) {
             console.log("move up");
-            to_drop[2] = true;
-            to_drop[3] = true;
+
+            for(var id=0; id<this.width; id++) {
+                to_drop[this.vp.length - 1 - id] = true;
+                new_draw[id] = true;
+            }
+
         } else if(move_dir==1) {
-            console.log("move right");
-            to_drop[0] = true;
-            to_drop[2] = true;
+            console.log("move right ");
+
+            for(var id=0; id<this.height; id++) {
+                to_drop[id * this.width] = true;
+                new_draw[(id * this.width) + this.width -1] = true;
+            }
         } else if(move_dir==-1) {
-            console.log("move left");
-            to_drop[1] = true;
-            to_drop[3] = true;
+             console.log("move left");
+            for(var id=0; id<this.height; id++) {
+                new_draw[id * this.width] = true;
+                to_drop[(id * this.width) + this.width -1] = true;
+            }
         }
 
         console.log(F("move dir {0}", [move_dir]));
+        console.log( new_draw);
         var map_vp = [];
 
-        for(var id=0; id<4; id++) {
+        for(var id=0; id<this.vp.length; id++) {
 
             var vp = this.vp[id], _vp;
             if(to_drop[id] == true) {
+                console.log(F("hide {0}", [id]));
+
                 vp.hide();
                 continue;
             }
 
-            console.log(F("move {0}", [id]));
-            _vp = vp.move(move_dir);
-            _vp.draw(id);
-            _vp.prefetch_around();
-
+            console.log(F("move {0} draw={1}", [id, new_draw[id]]));
+            _vp = vp.move(move_dir, !new_draw[id]);
             map_vp[vp.id] = vp;
-            map_vp[_vp.id] = _vp;
+
+            if(new_draw[id]) {
+                _vp.draw(id);
+                _vp.prefetch_around();
+
+                map_vp[_vp.id] = _vp;
+            }
         }
 
         this.vp = map_vp;

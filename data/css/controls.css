@@ -1,7 +1,12 @@
-.char_list {
-    float: left;
+.char_list, .tiles {
+    position: fixed;
+    right: 20px;
+    background: white;
 }
 
 #map {
     float: left;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
 }

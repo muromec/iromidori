@@ -4,7 +4,7 @@ HEX_H = 16;
 
 var draw_map = function(el) {
     // set global
-    paper = Raphael(el, 800, 600);
+    paper = Raphael(el, window.innerWidth, window.innerHeight);
 
     var row, rows = 24,
         col, cols = 32;
@@ -12,27 +12,34 @@ var draw_map = function(el) {
     var map = Map(rows, cols);
     map.vpc = new VPCache();
 
-    var vp0 = new ViewPort(map, 0, 0, cols/2, rows/2);
-    vp0.y = 20;
-    vp0.id = 0;
-    console.log("vp1");
-    vp1 = vp0.right();
-    vp1.id = 1;
-    console.log("vp2");
-    vp2 = vp0.bottom();
-    vp2.id = 2;
-    console.log("vp3");
-    vp3 = vp1.bottom();
-    vp3.id = 3;
+    console.log(F("vps: {0}x{1}", [map.width, map.height]));
 
-    map.vp = [vp0, vp1, vp2, vp3];
+    var vp = new ViewPort(map, 0, 0, cols/2, rows/2);
+    vp.id = 0;
+
+    map.vp = [vp];
+    while(map.vp.length < (map.width * map.height)) {
+
+        if((vp.id % map.width) < (map.width-1)) {
+            console.log("row+ "+vp.id);
+            vp = vp.right();
+
+        } else {
+            console.log("next row "+vp.id);
+            vp = map.vp[map.vp.length - map.width].bottom();
+        }
+
+        vp.id = map.vp.length;
+        map.vp.push(vp);
+    }
+
     var draw_vp = function(vp) {
         map.vpc.prefetch(vp.col, vp.row, function() {
             vp.draw()
             vp.prefetch_around();
         })
     }
-    for(var id=0; id<4; id++) {
+    for(var id=0; id<map.vp.length; id++) {
         draw_vp(map.vp[id]);
     }
 
@@ -50,8 +57,8 @@ var draw_map = function(el) {
     key('j', function() {move(0, 2)});
     key('k', function() {move(0, -2)});
 
-    key("up", function() {map.recenter(-2)});
-    key("down", function() {map.recenter(2)});
+    key("up", function() {map.recenter(-map.width)});
+    key("down", function() {map.recenter(map.width)});
     key("left", function() {map.recenter(-1)});
     key("right", function() {map.recenter(1)});
 
