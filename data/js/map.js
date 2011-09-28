@@ -101,18 +101,19 @@ var Map = function(rows, cols) {
             return;
         }
 
-        next.use(user);
 
         console.log(F("move from {0}x{1} to {2}x{3}",
                     [user.x, user.y, next.col, next.row]));
 
-        user.hex = next;
-
         if(user.x==undefined) {
-            if(!next.vp.hidden)
+            if(!next.vp.hidden) {
                 user.show(new_x, new_y, next.vp);
+                next.use(user);
+            }
         } else {
             user.move(new_x, new_y, next.vp);
+
+            next.use(user);
         }
 
     };

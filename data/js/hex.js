@@ -9,14 +9,21 @@ var Hex = function(x, y, w, h) {
     hex.y = y;
 
     hex.use = function (whom) {
+
+       if(whom.hex)
+           alert("CRAP!!!!!!!");
+
        hex.used = whom;
 
        if(whom != undefined && whom.img != undefined)
            hex.img = whom.img;
 
+       whom.hex = hex;
+
     };
 
     hex.free = function() {
+       hex.used.hex = false;
        hex.used = false;
        hex.img = false;
 
