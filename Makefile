@@ -9,7 +9,7 @@ endif
 
 all: run
 
-build: bin/py
+build: bin/py install reload
 
 run: bin/py
 	bin/py iromidori/main.py
@@ -22,4 +22,16 @@ build: bin/py
 bin/py: bin/buildout buildout.cfg
 	bin/buildout
 
+D=/var/lib/buildbot/midori-current/
+PID=/var/lib/buildbot/midori.pid
+
+install:
+	rm -rf $(D)
+	cp ./ $(D) -a
+
+reload:
+	start-stop-daemon --pidfile $(PID) --stop 
+	start-stop-daemon --pidfile $(PID) \
+	    -b  -m  \
+	    -S -x $(D)/bin/py  $(D)/iromidori/main.py
 # force

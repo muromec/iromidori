@@ -1,5 +1,6 @@
 import sys
-sys.path.insert(0, '.')
+here = str.join("/", sys.argv[0].split("/")[:-2])
+sys.path.insert(0, here)
 
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
@@ -41,10 +42,12 @@ if __name__ == '__main__':
     import logging
     logging.basicConfig(level=logging.INFO)
 
+    DATA = here+"/data/"
+
     application = web.Application([
             (r"/events", EventSocket),
             (r"/api/.*", ApiHandler),
-            (r"/(.*(png|js|html|css))", web.StaticFileHandler, {"path": "./data/"}),
+            (r"/(.*(png|js|html|css))", web.StaticFileHandler, {"path": DATA}),
     ])
     http_server = HTTPServer(application)
     http_server.listen(31574)
