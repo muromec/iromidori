@@ -9,6 +9,8 @@ endif
 
 all: run
 
+build: bin/py
+
 run: bin/py
 	bin/py iromidori/main.py
 
