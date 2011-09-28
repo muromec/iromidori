@@ -1,6 +1,7 @@
 var VPCache = function() {
     var vpc = this;
     vpc.cache=new Object();
+    vpc.around = new Object();
 
     vpc._fetched = function(data) {
         var col = data.col,

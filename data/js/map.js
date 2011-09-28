@@ -192,7 +192,7 @@ var Map = function(rows, cols) {
 
             console.log(F("move {0}", [id]));
             _vp = vp.move(move_dir);
-            _vp.draw();
+            _vp.draw(id);
             _vp.prefetch_around();
 
             map_vp[vp.id] = vp;

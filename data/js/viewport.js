@@ -13,13 +13,16 @@ var ViewPort = function(map, col, row, w, h) {
     vp.map = map;
 
     vp.hexes = [];
-    vp.around = new Object();
+
+    var key = F("{0}x{1}", [vp.col, vp.row]);
+    map.vpc.around[key] = vp;
+    vp.key = key;
 
     vp.at_off = function(off_x, off_y) {
-        var key = F("{0}x{1}", [off_x, off_y]);
+        var key = F("{0}x{1}", [vp.col+off_x, vp.row+off_y]);
 
-        if(key in vp.around)
-            return vp.around[key];
+        if(key in vp.map.vpc.around)
+            return vp.map.vpc.around[key];
 
         var new_vp = new ViewPort(vp.map,
                 vp.col + off_x, vp.row + off_y,
@@ -29,7 +32,6 @@ var ViewPort = function(map, col, row, w, h) {
         new_vp.x = vp.x + (off_x * HEX_W);
         new_vp.y = vp.y + (off_y * HEX_H);
 
-        vp.around[key] = new_vp;
 
         return new_vp;
     }
@@ -42,9 +44,9 @@ var ViewPort = function(map, col, row, w, h) {
         return vp.at_off(0, vp.h);
     }
 
-    vp.draw = function() {
+    vp.draw = function(_id) {
         if(vp._drawed == true)
-            return vp.show();
+            return vp.show(_id);
 
         console.log(F("draw vp.col={0}, w={1}, vp.row={2}, h={3}", [vp.col, vp.w, vp.row, vp.h]));
 
@@ -94,6 +96,7 @@ var ViewPort = function(map, col, row, w, h) {
             console.log(F("hex: {0}x{1} in vp{2}=vp{3}",
                     [hex.col, hex.row, hex.vp.id, vp.id]));
             vp.click_hex(hex, e.button);
+            __vp = vp;
         }
 
     }
@@ -132,15 +135,15 @@ var ViewPort = function(map, col, row, w, h) {
 
             hex.hide();
         }
+        vp._id = vp.id;
     }
 
-    vp.show = function() {
-        console.log("show "+vp.id);
-
+    vp.show = function(_id) {
         for(var id=0; id<vp.hexes.length; id++) {
             var hex=vp.hexes[id];
 
             hex.show();
+
         }
     }
 
@@ -152,6 +155,7 @@ var ViewPort = function(map, col, row, w, h) {
 
     vp.move = function(dir) {
         var off_x=0, off_y=0;
+        console.log(F("move {0} dir {1} ", [vp.key, dir]));
 
         if(dir==-1)
             off_x = vp.w;

@@ -10,6 +10,7 @@ var draw_map = function(el) {
         col, cols = 32;
 
     var map = Map(rows, cols);
+    map.vpc = new VPCache();
 
     var vp0 = new ViewPort(map, 0, 0, cols/2, rows/2);
     vp0.y = 20;
@@ -25,7 +26,6 @@ var draw_map = function(el) {
     vp3.id = 3;
 
     map.vp = [vp0, vp1, vp2, vp3];
-    map.vpc = new VPCache();
     var draw_vp = function(vp) {
         map.vpc.prefetch(vp.col, vp.row, function() {
             vp.draw()

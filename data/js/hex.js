@@ -33,17 +33,41 @@ var Hex = function(x, y, w, h) {
     };
 
     hex.move = function(off_x, off_y) {
-        hex.back_img.translate(off_x, off_y);
-
-        if(!hex.img)
-            return;
-
-        hex.img.translate(off_x, off_y);
+        hex._at_images(function(img) {
+            img.translate(off_x, off_y);
+        })
 
     };
 
-    hex.hide = function() { hex.back_img.hide(); }
-    hex.show = function() { hex.back_img.show(); }
+    hex._at_images = function(f) {
+        f(hex.back_img);
+        if(hex.img)
+            f(hex.img)
+    }
+
+    hex.images = function(f) {
+        hex._at_images(function(img) {
+            img[f]();
+        })
+    }
+
+    hex.hide = function() { 
+        hex._at_images(function(img) {
+            img._vpx = img.attrs.x - hex.vp.x,
+            img._vpy = img.attrs.y - hex.vp.y,
+
+            img.hide();
+        })
+    }
+    hex.show = function() {
+        hex._at_images(function(img) {
+            img.attr({
+                x: img._vpx + hex.vp.x,
+                y: img._vpy + hex.vp.y,
+            })
+            img.show();
+        })
+    }
 
     return hex;
 
