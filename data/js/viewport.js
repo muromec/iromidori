@@ -110,12 +110,17 @@ var ViewPort = function(map, col, row, w, h) {
             return;
         }
 
-        vp.map.changer.current_vp = vp;
+        if(vp.map.changer.hidden)
+            return vp.map.changer.show();
+
+        vp.map.changer.set_vp(vp);
 
         if(!vp.map.changer.current) {
             alert("select tile");
             return;
         }
+
+        vp.taint = true;
 
         hex.back_img.name = vp.map.changer.current;
         hex.back_img.sprite("base");

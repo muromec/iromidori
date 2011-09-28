@@ -16,6 +16,13 @@ var MapChanger = function() {
         jQuery.getJSON("/api/info/tile.list", mc._fetched)
     };
 
+    mc.set_vp = function(vp) {
+        if(mc.current_vp && mc.current_vp.taint && vp!=mc.current_vp)
+            mc.put_vp();
+
+        mc.current_vp = vp;
+    };
+
     mc.put_vp = function() {
         if(!mc.current_vp) {
             alert("change something");
@@ -62,6 +69,7 @@ var MapChanger = function() {
         mc.container.append(hide);
         hide.click(function() {
             mc.container.remove();
+            mc.hidden = true;
         })
 
     };
