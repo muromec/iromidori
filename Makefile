@@ -32,7 +32,7 @@ install:
 	cp ./ $(D) -a
 
 reload:
-	env PATH=$(P) start-stop-daemon --pidfile $(PID) --stop 
+	env PATH=$(P) start-stop-daemon --pidfile $(PID) --stop --oknodo
 	env PATH=$(P) start-stop-daemon --pidfile $(PID) \
 	    -b  -m  \
 	    -S -x $(D)/bin/py  $(D)/iromidori/main.py
