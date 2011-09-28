@@ -56,6 +56,14 @@ var MapChanger = function() {
 
         save.click(mc.put_vp);
 
+        var hide = $("<input>");
+        hide.val("Hide");
+        hide.attr("type", "button");
+        mc.container.append(hide);
+        hide.click(function() {
+            mc.container.remove();
+        })
+
     };
 
     mc.add_tile = function(tile_typ) {

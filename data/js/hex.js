@@ -58,6 +58,13 @@ var Hex = function(x, y, w, h) {
 
             img.hide();
         })
+
+        if(!hex.used)
+            return;
+
+        hex.used.hide();
+        hex.free();
+
     }
     hex.show = function() {
         hex._at_images(function(img) {

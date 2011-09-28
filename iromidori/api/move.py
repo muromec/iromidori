@@ -18,8 +18,8 @@ def move(who, ox, oy, group, **kw):
     group.send({
         "fn": "move",
         "data": {
-            "ox": ox,
-            "oy": oy,
+            "x": who.x,
+            "y": who.y,
             "uid": who.uid,
         }
     })

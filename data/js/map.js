@@ -51,108 +51,68 @@ var Map = function(rows, cols) {
         if(this.users[uid])
             return;
 
-        var img_o = undefined;
+        var user = new User(uid, x, y, img);
+        user.draw();
 
-        if(img !== undefined) {
-            var char_w = 100,
-                char_h = 40;
-
-            if(img=="goldy")
-                char_h = 100;
-
-            img_o = new Sprite("char", img, x * HEX_W, y * HEX_H, char_w, char_h);
-            img_o._img = img;
-            img_o._sprite_x_off = 0;
-            img_o._sprite = 0;
-
-        }
-
-        _img = img_o;
-
-        var user = new User(uid, x, y, img_o);
-
+        var hex = (this.cells[user.x] || [])[user.y];
         this.users[uid] = user;
 
-        var hex = this.cells[user.x][user.y];
         console.log(F("hex: {0}, {1}x{2}",
                 [hex, user.x, user.y]));
-        hex.use(user);
+
+        if(hex) {
+            user.show(x, y, this.vp[0]);
+
+            hex.use(user);
+            user.hex = hex;
+        } else {
+            user.hide();
+        }
+
 
         return user;
 
     };
 
-    this.move = function(_arg, o_x, o_y) {
+    this.move = function(_arg, new_x, new_y) {
 
         var user =  this.users[_arg.uid];
-        o_x = _arg.ox;
-        o_y = _arg.oy;
+        new_x = _arg.x
+        new_y = _arg.y;
 
         if(this.lock) {
             return;
         }
 
+        if(user.x!==undefined) {
+            var old = user.hex;
+            old.free();
+        }
+
         var next = null;
-        var old = this.cells[user.x][user.y];
+        
+        var col = this.cells[new_x] || [];
 
-        console.log(F("move from {0}x{1} @ {2}",
-                    [user.x, user.y, old]));
+        next = col[new_y];
 
-        var col = this.cells[user.x + o_x];
-
-        next = col[user.y + o_y];
-
-        console.log(F("next {0}x{1} @{2} {3}x{4}", [
-                    o_x, o_y, next, user.x + o_x, user.y+o_y]));
-
-        if(!next || next.used) {
-            console.log("fuckup");
+        if(!next) {
+            console.log("gone out");
+            user.hide();
             return;
         }
 
-        old.free();
         next.use(user);
 
         console.log(F("move from {0}x{1} to {2}x{3}",
                     [user.x, user.y, next.col, next.row]));
 
-        user.x = next.col;
-        user.y = next.row;
         user.hex = next;
 
-        if(user.img != undefined) {
-            var sprite_x_off = user.img._sprite_x_off;
-
-            if(o_x > 0) {
-                sprite_x_off = -30;
-                user.img.dir(1);
-
-            } else if (o_x < 0) {
-                sprite_x_off = 0;
-                user.img.dir(0);
-            }
-
-
-            user.img.sprite_cycle("go", 150);
-
-            user.img.animateAlong(F("M{0},{1}L{2},{3}",[
-
-                    (old.col * HEX_W)+user.img._sprite_x_off,
-                    old.row * HEX_H,
-
-                    (next.col * HEX_W)+sprite_x_off,
-                    next.row * HEX_H
-                    ]), 
-                    800,
-                    false,
-                    function() {
-                        user.img.sprite_cycle_stop();
-                    }
-            );
-
-            user.img._sprite_x_off = sprite_x_off;
-
-            user.img.toFront();
+        if(user.x==undefined) {
+            if(!next.vp.hidden)
+                user.show(new_x, new_y, next.vp);
+        } else {
+            user.move(new_x, new_y, next.vp);
         }
 
     };
