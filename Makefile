@@ -32,8 +32,8 @@ install:
 	cp ./ $(D) -a
 
 reload:
-	start-stop-daemon --pidfile $(PID) --stop 
-	start-stop-daemon --pidfile $(PID) \
+	env PATH=$(PATH) start-stop-daemon --pidfile $(PID) --stop 
+	env PATH=$(PATH) start-stop-daemon --pidfile $(PID) \
 	    -b  -m  \
 	    -S -x $(D)/bin/py  $(D)/iromidori/main.py
 # force
