@@ -51,6 +51,8 @@ var MapChanger = function() {
 
         mc.add_tiles();
         mc.add_btn();
+
+        mc._shown = true;
     }
 
     mc.add_btn = function() {
@@ -69,7 +71,7 @@ var MapChanger = function() {
         mc.container.append(hide);
         hide.click(function() {
             mc.container.remove();
-            mc.hidden = true;
+            mc._shown = false;
         })
 
     };

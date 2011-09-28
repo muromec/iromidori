@@ -110,7 +110,7 @@ var ViewPort = function(map, col, row, w, h) {
             return;
         }
 
-        if(vp.map.changer.hidden)
+        if(!vp.map.changer._shown)
             return vp.map.changer.show();
 
         vp.map.changer.set_vp(vp);
