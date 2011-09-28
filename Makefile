@@ -1,4 +1,5 @@
 PY_VER  = $(shell python -V 2>&1 | cut -f 2 -d ' ' | cut -f 1 -d .)
+PATH=$(PATH):/sbin:/usr/sbin
 
 ifeq ($(PY_VER), 3)
     PYTHON=python2
