@@ -4,6 +4,8 @@ import os
 from info import TILES
 from random import sample
 
+MAP_DATA = os.getenv("MAPDATA") or "./data/"
+
 MAP = {
 }
 
@@ -44,7 +46,7 @@ def vp(col, row, **kw):
         return tileret
 
     if (col,row) not in MAP:
-        fname = "./data/map/%dx%d.json" % (col, row)
+        fname = MAP_DATA+"/map/%dx%d.json" % (col, row)
         if os.access(fname, 0):
             MAP[(col,row)] = load(open(fname))
         else:
@@ -61,7 +63,7 @@ def vp(col, row, **kw):
 @view(url="/map/vp.change")
 def vp_edit(col, row, vp, **kw):
     MAP[(col,row)] = vp 
-    f = open("./data/map/%dx%d.json" % (col, row), 'wb')
+    f = open(MAP_DATA+"/map/%dx%d.json" % (col, row), 'wb')
     dump(vp, f)
     f.flush()
     f.close()

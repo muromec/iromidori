@@ -25,6 +25,7 @@ bin/py: bin/buildout buildout.cfg
 	bin/buildout
 
 D=/var/lib/buildbot/midori-current/
+MAP=/var/lib/buildbot/midori-data/
 PID=/var/lib/buildbot/midori.pid
 
 install:
@@ -33,7 +34,7 @@ install:
 
 reload:
 	env PATH=$(P) start-stop-daemon --pidfile $(PID) --stop --oknodo
-	env PATH=$(P) start-stop-daemon --pidfile $(PID) \
+	env PATH=$(P) MAPDATA=$(MAP) start-stop-daemon --pidfile $(PID) \
 	    -b  -m  \
 	    -S -x $(D)/bin/py  $(D)/iromidori/main.py
 # force
