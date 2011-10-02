@@ -1,12 +1,12 @@
 EMPTY_PNG = "/img/empty.png";
 
-var Sprite = function(cls, name, x, y, w, h) {
+var Sprite = function(cls, name, x, y, w, h, dir) {
     var image = paper.image(EMPTY_PNG, x, y, w, h);
 
     image.cls = cls;
     image.state = "base";
     image.name = name;
-    image._dir = 0;
+    image._dir = dir || 0;
     image.frames = {
         "go": 1,
         "fire": 3,

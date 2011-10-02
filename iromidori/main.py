@@ -1,5 +1,5 @@
 import sys
-here = str.join("/", sys.argv[0].split("/")[:-2])
+here = str.join("/", sys.argv[0].split("/")[:-2]) or '.'
 sys.path.insert(0, here)
 
 from tornado.httpserver import HTTPServer

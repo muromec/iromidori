@@ -7,6 +7,7 @@ var Hex = function(x, y, w, h) {
     hex.used = false;
     hex.x = x;
     hex.y = y;
+    hex.frame = 0;
 
     hex.use = function (whom) {
 
@@ -33,7 +34,8 @@ var Hex = function(x, y, w, h) {
 
        hex.back_img = new Sprite("tile", hex.back_img_name,
                hex.x, hex.y - HEX_H,
-               HEX_W_FULL, HEX_H*2
+               HEX_W_FULL, HEX_H*2,
+               hex.frame
        );
        hex.back_img.toBack();
 

@@ -79,8 +79,16 @@ var ViewPort = function(map, col, row, w, h) {
         var y = _row * HEX_H;
 
         var hex = new Hex(x + vp.x, y + vp.y, HEX_W, HEX_H);
+        var tile_info = vp.tiles[_col >> 1][_row >> 1],
+            tile_typ, tile_frame=0;
 
-        hex.back_img_name = vp.tiles[_col >> 1][_row >> 1];
+        if(typeof(tile_info) == 'string') {
+            hex.back_img_name = tile_info;
+        } else {
+            hex.back_img_name = tile_info[0];
+            hex.frame = tile_info[1];
+        }
+
         hex.row = row;
         hex.col = col;
         hex.map = vp.map;
@@ -123,6 +131,7 @@ var ViewPort = function(map, col, row, w, h) {
         vp.taint = true;
 
         hex.back_img.name = vp.map.changer.current;
+        hex.back_img._dir = vp.map.changer.current_frame;
         hex.back_img.sprite("base");
 
         if(button!=0) {

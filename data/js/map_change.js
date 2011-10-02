@@ -76,13 +76,21 @@ var MapChanger = function() {
 
     };
 
-    mc.add_tile = function(tile_typ) {
-       var tile = $("<p>"),
+    mc.add_tile = function(_arg) {
+        var tile = $("<p>"),
             img = $("<img>"),
-            name = $("<span>");
+            name = $("<span>"),
+            tile_typ = _arg[0],
+            max_frame = _arg[1];
 
-        img.attr("src", F("/img/tile/{0}_0.png",
-                    [tile_typ]));
+        var set_frame = function(frame) {
+            img.attr("src", F("/img/tile/{0}_{1}.png",
+                        [tile_typ, frame]));
+
+            img.attr("frame", frame);
+        }
+
+        set_frame(0);
 
         tile.append(img);
 
@@ -92,7 +100,17 @@ var MapChanger = function() {
         mc.container.append(tile);
 
         img.click(function() {
-            mc.current = tile_typ;
+            if(mc.current != tile_typ) {
+                mc.current = tile_typ;
+                mc.current_frame = img.attr("frame");
+                return;
+            }
+            var cur_frame = img.attr("frame");
+            cur_frame++;
+            if(cur_frame > max_frame) cur_frame=0;
+
+            set_frame(cur_frame);
+            mc.current_frame = cur_frame;
         })
 
     };

@@ -18,11 +18,11 @@ def char_list(**kw):
     return dumps(ret), None
 
 TILES = [
-        "grass",
-        "grass_void",
-        "magma",
-        "water_e",
-        "stone_h",
+        ("grass",0),
+        ("grass_void",3),
+        ("magma",0),
+        ("water_e",0),
+        ("stone_h",0),
 ]
 
 @view(url="/info/tile.list")
