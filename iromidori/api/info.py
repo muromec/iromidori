@@ -19,6 +19,7 @@ def char_list(**kw):
 
 TILES = [
         "grass",
+        "grass_void",
         "magma",
         "water_e",
         "stone_h",
