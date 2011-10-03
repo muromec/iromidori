@@ -7,6 +7,7 @@ def enter(who, group, char_type, **kw):
     who.y = 8
     who.uid = str(uuid4())
     who.char = char_type
+    who.point = {}
 
     for cn in group.subs:
         group.send({

@@ -19,6 +19,10 @@ var Map = function(rows, cols) {
        user.fire();
     };
 
+    this.err = function(msg) {
+        alert(msg);
+    }
+
     this.drop_user = function(_arg) {
         var user =  this.users[_arg.uid];
 
