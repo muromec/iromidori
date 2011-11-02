@@ -94,17 +94,26 @@ class BotConnector(Connector):
         def send(self, data):
             self.cn.write_message(simplejson.dumps(data))
 
+        def sched(self, delta, **kw):
+            import time
+            def send():
+                evapi(who=self, **kw)
+
+            next_time = time.time() + delta
+
+            self.cn.io_loop.add_timeout(next_time, send)
+
+
     def on_message(self, data):
         msg = simplejson.loads(data)
         kw = msg.get('data')
         if not isinstance(kw, dict):
             kw = {"data": kw}
 
-        evapi(msg['fn'], who=self.state, **kw)
+        evapi(fn=msg['fn'], who=self.state, **kw)
 
     def open(self):
         self.state = self.State(self)
-        print 'opened'
         self.write_message({
             "url" : "/enter",
             "char_type" : "dog",

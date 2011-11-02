@@ -6,18 +6,28 @@ from random import sample
 class Somebody(object):
     pass
 
-def evapi(fn, **kw):
-    return chain.run([route], fn=fn, **kw)
+def evapi(**kw):
+    return chain.run([route], **kw)
 
 @match(fn='set_self')
 def zigote(who, uid, **kw):
     who.uid = uid
     who.near = []
+    who.target = None
+    who.will = None
 
 
-@match(frm=Somebody)
+@match(fn='add_user', frm=Somebody)
 def fill_near(frm, who, **kw):
     who.near.append(frm)
+
+@match(fn='drop_user')
+def drop_user(who, frm, **kw):
+    if frm in who.near:
+        who.near.remove(frm)
+
+    if frm == who.target:
+        who.target = None
 
 @match(fn='add_user')
 def fill_user(frm, **kw):
@@ -38,9 +48,14 @@ def moved(frm, x, y, **kw):
     frm.y = y
 
 
-@match(fn='move', target=Somebody)
-def target_moved(target, who, **kw):
-    frm = target
+@match(will='stalk_move', target=Somebody, frm=Somebody)
+def stalk(who, x, y, target, **kw):
+
+    if target != who.target:
+        return
+
+    if (target.x, target.y) != (x,y):
+        return
 
     def norm(val, lim=1):
         if val > 0:
@@ -50,8 +65,8 @@ def target_moved(target, who, **kw):
         else:
             return val
 
-    ox = norm(frm.x - who.x, lim=2)
-    oy = norm(frm.y - who.y)
+    ox = norm(x - who.x, lim=2)
+    oy = norm(y - who.y)
     if not ox and oy:
         oy*= 2
 
@@ -64,17 +79,26 @@ def target_moved(target, who, **kw):
         "oy": oy,
     })
 
+    who.sched(1.8, will='stalk_move', x=x, y=y, uid=target.uid)
 
-@match(fn='move', frm=Somebody)
-@upd_ctx('target')
-def set_target(frm, who, **kw):
-    target =  getattr(who, 'target', None)
-    if target and target != frm:
-        return None,
 
-    who.target = frm
+@upd_ctx('target', 'will')
+def get_target(who, will=None, **kw):
+    return who.target, who.will or will
 
-    return frm,
+@match(frm=Somebody)
+def select_target(who, frm, fn=None, will=None, **kw):
+    if who.target or will:
+        return
+
+    ATTRACT = [
+            "add_user",
+            "move",
+    ]
+    if fn in ATTRACT and frm in who.near:
+        who.target = frm
+        who.will = 'stalk_move'
+
 
 @match(uid=basestring)
 @upd_ctx('frm')
@@ -88,7 +112,6 @@ def who_is(uid, who, **kw):
             frm = near
             break
     else:
-        print 'new'
         return Somebody(), None
 
     return frm, None
@@ -96,11 +119,14 @@ def who_is(uid, who, **kw):
 
 def route(**kw):
     return [
-            target_moved,
+            stalk,
+
             moved,
-            set_target,
+            get_target,
 
+            select_target,
 
+            drop_user,
             fill_user,
             fill_near,
 
