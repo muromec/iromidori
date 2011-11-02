@@ -9,6 +9,9 @@ def enter(who, group, char_type, **kw):
     who.char = char_type
     who.point = {}
 
+    who.send({"fn": "set_self", "data":{
+        "uid": who.uid}})
+
     for cn in group.subs:
         group.send({
             "fn": "add_user",
@@ -19,9 +22,6 @@ def enter(who, group, char_type, **kw):
                 "uid": cn.state.uid,
             }
         })
-
-    who.send({"fn": "set_self", "data":{
-        "uid": who.uid}})
 
 
 @view(url="/out")
