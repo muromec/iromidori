@@ -12,14 +12,18 @@ def enter(who, group, char_type, **kw):
     who.send({"fn": "set_self", "data":{
         "uid": who.uid}})
 
-    for cn in group.subs:
+    subs = group.subs[:]
+    subs.remove(who)
+    subs.insert(0, who)
+
+    for cn in subs:
         group.send({
             "fn": "add_user",
             "data": {
-                "x": cn.state.x,
-                "y": cn.state.y,
-                "char": cn.state.char,
-                "uid": cn.state.uid,
+                "x": cn.x,
+                "y": cn.y,
+                "char": cn.char,
+                "uid": cn.uid,
             }
         })
 

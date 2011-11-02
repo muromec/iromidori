@@ -22,7 +22,7 @@ class Subscribers(object):
 
         for cn in self.subs:
             try:
-                cn.write_message(data_str)
+                cn.send(data_str)
             except IOError:
                 logging.error("cant send")
 
@@ -42,12 +42,12 @@ class EventSocket(websocket.WebSocketHandler):
     def open(self):
         self.state = self.State(self)
 
-        subs.add(self)
+        subs.add(self.state)
 
     def on_message(self, message):
         logging.info("got msg: %r" % message)
         evapi(raw=message, group=subs, who=self.state)
 
     def on_close(self):
-        subs.drop(self)
+        subs.drop(self.state)
         evapi(msg={"url": "/out"}, group=subs, who=self.state)
