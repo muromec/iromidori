@@ -48,6 +48,28 @@ def moved(frm, x, y, **kw):
     frm.y = y
 
 
+def close(who, target):
+    ox = target.x - who.x
+    oy = target.y - who.y
+
+    return (
+            ( -2 <= ox <= 2 and -1 <= oy <= 1)
+            or
+            ( ox == 0 and -2 <= oy <= 2)
+    )
+
+
+@match(fn='move', target=Somebody)
+def moved_self(frm, who, target, **kw):
+    if frm not in [who, target]:
+        return
+
+    if close(who, target):
+        print 'ok, here'
+        who.will = None
+    else:
+        who.will = 'stalk_move'
+
 @match(will='stalk_move', target=Somebody, frm=Somebody)
 def stalk(who, x, y, target, **kw):
 
@@ -79,7 +101,7 @@ def stalk(who, x, y, target, **kw):
         "oy": oy,
     })
 
-    who.sched(1.8, will='stalk_move', x=x, y=y, uid=target.uid)
+    who.sched(1.8, will=who.will, x=x, y=y, uid=target.uid)
 
 
 @upd_ctx('target', 'will')
@@ -115,16 +137,25 @@ def who_is(uid, who, **kw):
         return Somebody(), None
 
     return frm, None
+
+@match(fn='err')
+def err_stop(who, data, **kw):
+    import logging
+    logging.error("stop err: %r" % data)
+    who.will = None
     
 
 def route(**kw):
     return [
             stalk,
 
+            moved_self,
             moved,
             get_target,
 
             select_target,
+
+            err_stop,
 
             drop_user,
             fill_user,
