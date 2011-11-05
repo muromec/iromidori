@@ -1,4 +1,5 @@
 PY_VER  = $(shell python -V 2>&1 | cut -f 2 -d ' ' | cut -f 1 -d .)
+TORNADO = $(wildcard etc/eggs/tornado-2*.egg/tornado/)
 
 P=/sbin:/usr/sbin:$(PATH)
 
@@ -11,10 +12,19 @@ endif
 
 all: run
 
-build: bin/py install reload
+build: bin/py patch_tornado install reload
+
+patch_tornado: patches/0001_tornado_websocket_client.diff.done
+
+patches/0001_tornado_websocket_client.diff.done: patches/0001_tornado_websocket_client.diff $(TORNADO)
+	patch -d $(TORNADO) < $<
+	touch $@
 
 run: bin/py
 	bin/py iromidori/main.py
+
+run_bot: bin/py patch_tornado
+	env PYTHONPATH=. bin/py iromidori/botclient.py
 
 bin/buildout:
 	$(PYTHON) bootstrap.py

@@ -1,1 +1,2 @@
 *.pyc
+patches/*.diff.done

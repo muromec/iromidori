@@ -1,0 +1,110 @@
+--- etc/eggs/tornado-2.1.1-py2.7.egg/tornado/websocket.py	2011-11-05 16:44:39.920934027 +0200
++++ websocket.py	2011-11-02 21:48:33.456894000 +0200
+@@ -383,6 +383,24 @@
+         self.async_callback(self.handler.open)(*self.handler.open_args, **self.handler.open_kwargs)
+         self._receive_frame()
+ 
++    def _gen_mask(self,):
++        import random
++        mask = ""
++        for x in range(4):
++            mask+=chr(random.randint(0, 255))
++
++        return bytearray(mask)
++
++    def _mask_data(self, data):
++        mask = self._gen_mask()
++
++        masked = bytearray(data)
++
++        for i in xrange(len(data)):
++            masked[i] = masked[i] ^ mask[i % 4]
++
++        return mask, masked
++
+     def _write_frame(self, fin, opcode, data):
+         if fin:
+             finbit = 0x80
+@@ -390,13 +408,25 @@
+             finbit = 0
+         frame = struct.pack("B", finbit | opcode)
+         l = len(data)
++
++        lm = l
++        if not self.request:
++            lm |= 0x80
++
+         if l < 126:
+-            frame += struct.pack("B", l)
++            frame += struct.pack("B", lm)
+         elif l <= 0xFFFF:
+-            frame += struct.pack("!BH", 126, l)
++            frame += struct.pack("!BH", 126, lm)
+         else:
+-            frame += struct.pack("!BQ", 127, l)
+-        frame += data
++            frame += struct.pack("!BQ", 127, lm)
++
++        if self.request:
++            frame += data
++        else:
++            mask, masked = self._mask_data(data)
++            frame += bytes_type(mask)
++            frame += bytes_type(masked)
++
+         self.stream.write(frame)
+ 
+     def write_message(self, message, binary=False):
+@@ -420,24 +450,35 @@
+         self._final_frame = header & 0x80
+         self._frame_opcode = header & 0xf
+         if not (payloadlen & 0x80):
+-            # Unmasked frame -> abort connection
+-            self._abort()
++            if self.request:
++                # Unmasked frame -> abort connection
++                self._abort()
++            else:
++                self._frame_mask = None
++
+         payloadlen = payloadlen & 0x7f
+         if payloadlen < 126:
+             self._frame_length = payloadlen
+-            self.stream.read_bytes(4, self._on_masking_key)
++            self._get_mask()
+         elif payloadlen == 126:
+             self.stream.read_bytes(2, self._on_frame_length_16)
+         elif payloadlen == 127:
+             self.stream.read_bytes(8, self._on_frame_length_64)
+ 
++    def _get_mask(self):
++        if self.request:
++            self.stream.read_bytes(4, self._on_masking_key)
++        else:
++            self.stream.read_bytes(self._frame_length, self._on_frame_data)
++
++
+     def _on_frame_length_16(self, data):
+         self._frame_length = struct.unpack("!H", data)[0];
+-        self.stream.read_bytes(4, self._on_masking_key);
++        self._get_mask()
+         
+     def _on_frame_length_64(self, data):
+         self._frame_length = struct.unpack("!Q", data)[0];
+-        self.stream.read_bytes(4, self._on_masking_key);
++        self._get_mask()
+ 
+     def _on_masking_key(self, data):
+         self._frame_mask = bytearray(data)
+@@ -445,8 +486,9 @@
+ 
+     def _on_frame_data(self, data):
+         unmasked = bytearray(data)
+-        for i in xrange(len(data)):
+-            unmasked[i] = unmasked[i] ^ self._frame_mask[i % 4]
++        if self._frame_mask:
++            for i in xrange(len(data)):
++                unmasked[i] = unmasked[i] ^ self._frame_mask[i % 4]
+ 
+         if not self._final_frame:
+             if self._fragmented_message_buffer:
