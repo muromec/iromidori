@@ -3,6 +3,8 @@ from biribiri.chain.utils import match, upd_ctx
 
 from random import sample
 
+HOME = 20, 14
+
 class Somebody(object):
     pass
 
@@ -14,7 +16,10 @@ def zigote(who, uid, **kw):
     who.uid = uid
     who.near = []
     who.target = None
-    who.will = None
+    who.will = "free_move"
+    who.direction_ttl = 0
+
+    who.sched(1.4, will=who.will, fn="sched")
 
 
 @match(fn='add_user', frm=Somebody)
@@ -59,25 +64,55 @@ def close(who, target):
     )
 
 
-@match(fn='move', target=Somebody)
+
+@match(will="free_move", fn="sched")
+def free_move(who, **kw):
+    who.direction_ttl -= 1
+    if who.direction_ttl <= 0:
+        print 'reset direction'
+	[who.direction] = sample([
+		(2,1), (2,-1), (-2,1), (-2,-1)
+	], 1)
+	[who.direction_ttl] = sample([5,7,13,17], 1)
+
+    ox, oy = who.direction
+
+    who.send({
+        "url": "/move",
+        "ox": ox,
+        "oy": oy,
+    })
+
+
+def away(who, (x,y), limit=15):
+    def norm(val):
+        return val if val > 0 else -val
+
+    ox = norm(who.x - x)
+    oy = norm(who.y - y)
+
+    return ox > limit or oy > limit
+
+
+@match(fn='move')
 def moved_self(frm, who, target, **kw):
-    if frm not in [who, target]:
+    # TODO: find a way to match myself
+    if frm != who:
         return
 
-    if close(who, target):
-        print 'ok, here'
-        who.will = None
-    else:
-        who.will = 'stalk_move'
+    # split away?
+    if who.will == 'stalk_move' and close(who, target):
+        who.will = 'free_move'
+	who.target = None
 
-@match(will='stalk_move', target=Somebody, frm=Somebody)
-def stalk(who, x, y, target, **kw):
+    elif who.will == 'free_move' and away(who, HOME):
+        print 'go home!'
+        who.will = 'home_move'
 
-    if target != who.target:
-        return
+    elif who.will == 'home_move' and not away(who, HOME, limit=5):
+        who.will = 'free_move'
 
-    if (target.x, target.y) != (x,y):
-        return
+def dir_point(who, (x,y)):
 
     def norm(val, lim=1):
         if val > 0:
@@ -95,13 +130,28 @@ def stalk(who, x, y, target, **kw):
     if ox and not oy:
         [oy] = sample([1,-1],1)
 
+
+    return ox, oy
+
+def do_move(who, (ox, oy)):
+
     who.send({
         "url": "/move",
         "ox": ox,
         "oy": oy,
     })
 
-    who.sched(1.8, will=who.will, x=x, y=y, uid=target.uid)
+@match(will='stalk_move', target=Somebody, fn='sched')
+def stalk(who, target, **kw):
+    ox, oy = dir_point(who, (target.x, target.y))
+    do_move(who, (ox, oy))
+
+
+@match(will="home_move")
+def home_move(who, **kw):
+    ox, oy = dir_point(who, HOME)
+    do_move(who, (ox, oy))
+
 
 
 @upd_ctx('target', 'will')
@@ -110,6 +160,9 @@ def get_target(who, will=None, **kw):
 
 @match(frm=Somebody)
 def select_target(who, frm, fn=None, will=None, **kw):
+    if will and 'free' in will:
+        will = None
+
     if who.target or will:
         return
 
@@ -142,12 +195,23 @@ def who_is(uid, who, **kw):
 def err_stop(who, data, **kw):
     import logging
     logging.error("stop err: %r" % data)
-    who.will = None
-    
+
+    who.will = 'free_move'
+    who.target = None
+    who.direction_ttl = 0
+
+    raise chain.Stop
+
+@match(fn='sched')
+def sched(who, **kw):
+    who.sched(1.4, fn="sched")
 
 def route(**kw):
     return [
+            sched,
+            free_move,
             stalk,
+            home_move,
 
             moved_self,
             moved,
