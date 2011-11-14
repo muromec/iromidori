@@ -4,6 +4,7 @@ from biribiri.chain.utils import match, upd_ctx
 from random import sample
 
 HOME = 20, 14
+MOVE_SCHED = 1.4
 
 class Somebody(object):
     pass
@@ -19,7 +20,7 @@ def zigote(who, uid, **kw):
     who.will = "free_move"
     who.direction_ttl = 0
 
-    who.sched(1.4, will=who.will, fn="sched")
+    who.sched(MOVE_SCHED, will=who.will, fn="sched")
 
 
 @match(fn='add_user', frm=Somebody)
@@ -204,7 +205,7 @@ def err_stop(who, data, **kw):
 
 @match(fn='sched')
 def sched(who, **kw):
-    who.sched(1.4, fn="sched")
+    who.sched(MOVE_SCHED, fn="sched")
 
 def route(**kw):
     return [
