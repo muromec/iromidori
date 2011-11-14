@@ -92,6 +92,10 @@ var User = function(uid, x, y, img) {
         var char_w = 100,
             char_h = 40;
 
+        /*
+         * XXX: kill kitamuraj for this.
+         * XXX: also need offset map
+         * */
         if(img=="goldy")
             char_h = 100;
         if(img=="suncrawler")
