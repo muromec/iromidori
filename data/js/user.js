@@ -94,6 +94,10 @@ var User = function(uid, x, y, img) {
 
         if(img=="goldy")
             char_h = 100;
+        if(img=="suncrawler")
+            char_h = 76;
+        if(img=="bloodeye")
+            char_h = 57;
 
         this.img = new Sprite("char", this.img_name, -500, -500, char_w, char_h);
         this.img._sprite_x_off = 0;

@@ -7,6 +7,8 @@ CHARS = [
         "magma",
         "goldy",
 	"dog",
+        "suncrawler",
+        "bloodeye",
 ]
 
 @view(url="/info/char.list")
