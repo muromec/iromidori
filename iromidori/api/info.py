@@ -1,6 +1,7 @@
 from biribiri.chain.utils import view, upd_ctx
 from simplejson import dumps
 
+# TODO: split by classes
 CHARS = [
         "faery",
         "deadly",
