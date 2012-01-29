@@ -12,27 +12,18 @@ endif
 
 all: run
 
-build: bin/py patch_tornado install reload
+build: env/bin/python install reload
 
-patch_tornado: patches/0001_tornado_websocket_client.diff.done
+env/bin/python:
+	$(PY) -m virtualenv env
 
-patches/0001_tornado_websocket_client.diff.done: patches/0001_tornado_websocket_client.diff $(TORNADO)
-	patch -d $(TORNADO) < $<
-	touch $@
+run: env/bin/python
+	env/bin/python iromidori/main.py
 
-run: bin/py
-	bin/py iromidori/main.py
-
-run_bot: bin/py patch_tornado
-	env PYTHONPATH=. bin/py iromidori/botclient.py
-
-bin/buildout:
-	$(PYTHON) bootstrap.py
+run_bot: env/bin/python
+	env PYTHONPATH=. bin/python iromidori/botclient.py
 
 build: bin/py
-
-bin/py: bin/buildout buildout.cfg
-	bin/buildout
 
 D=/var/lib/buildbot/midori-current/
 MAP=/var/lib/buildbot/midori-data/
@@ -46,5 +37,5 @@ reload:
 	env PATH=$(P) start-stop-daemon --pidfile $(PID) --stop --oknodo
 	env PATH=$(P) MAPDATA=$(MAP) start-stop-daemon --pidfile $(PID) \
 	    -b  -m  \
-	    -S -x $(D)/bin/py  $(D)/iromidori/main.py
+	    -S -x $(D)env/bin/python  $(D)/iromidori/main.py
 # force
