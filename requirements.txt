@@ -1,0 +1,7 @@
+
+http://github.com/muromec/biribiri.chain/tarball/master#egg=biribiri.chain
+http://github.com/facebook/tornado/zipball/master#egg=tornado-2.1.1git
+jinja2
+simplejson
+
+
