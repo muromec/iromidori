@@ -4,6 +4,7 @@ from tornado import websocket
 from simplejson import dumps
 
 from evapi import evapi
+from char import CharStats
 
 class Subscribers(object):
     def __init__(self,name):
@@ -29,9 +30,11 @@ class Subscribers(object):
 subs = Subscribers('main')
 
 class EventSocket(websocket.WebSocketHandler):
-    class State(object):
+    class State(CharStats):
         def __init__(self, cn):
             self.cn = cn
+
+            super(self.__class__, self).__init__()
 
         def send(self, data):
             if not isinstance(data, basestring):
