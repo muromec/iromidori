@@ -66,7 +66,7 @@ var draw_map = function(el) {
         server.push({"url": "/fire"})
     } );
 
-    var server = new Server();
+    server = new Server();
     server.cb = function(data) {
         console.log("got "+data.fn);
         map[data.fn](data.data);
