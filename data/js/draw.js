@@ -1,6 +1,6 @@
-HEX_W = 21;
-HEX_W_FULL = 60;
-HEX_H = 16;
+HEX_W = 24;
+HEX_W_FULL = 72;
+HEX_H = 24;
 
 var draw_map = function(el) {
     // set global
