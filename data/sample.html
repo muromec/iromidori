@@ -1,33 +1,23 @@
 <html>
     <head>
         <script type="text/javascript" src="/js/requires.js" ></script>
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
         <link rel="stylesheet" href="/css/controls.css" type="text/css" />
 
         <!-- force upd -->
 
     </head>
     <body>
-    <div id="map" />
+    <canvas id="map"></canvas>
 
     <script>
         _m(function() {
-            F = Raphael.format;
-            draw_map("map")
+            window.draw_map("map")
         } );
-        _m("server");
-        _m("raphael");
-        _m("keymaster.min");
-        _m("draw");
-        _m("user");
-        _m("hex");
-        _m("map");
-        _m("sprite");
-        _m("viewport");
-        _m("viewport_cache");
-        _m("enter");
-        _m("map_change");
+        _m("jquery-1.7.1-dev");
+        _m("processing-1.3.6.min");
 
+        _m("draw");
+    
     </script>
     </body>
 </html>

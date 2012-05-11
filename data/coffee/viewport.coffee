@@ -1,84 +1,77 @@
-var ViewPort = function(map, col, row, w, h) {
+class ViewPort
+    constructor: (@map, @col, @row, @w, @h) ->
 
-    var vp = this;
-    vp.row = row;
-    vp.col = col;
+        @hexes = []
+        @hidden = false
+        @x = 0
+        @y = 0
 
-    vp.x = 0;
-    vp.y = 0;
+        key = "#{@col}x#{@row}"
 
-    vp.w = w;
-    vp.h = h;
+        @map.vpc.around[key] = this
+        @key = key
 
-    vp.map = map;
+    at_off: (off_x, off_y) ->
+        _col_off = @col+off_x
+        _row_off = @row+off_y
 
-    vp.hexes = [];
-    vp.hidden = false;
+        key = "#{_col_off}x#{_row_off}"
 
-    var key = F("{0}x{1}", [vp.col, vp.row]);
-    map.vpc.around[key] = vp;
-    vp.key = key;
+        if @map.vpc.around[key]
+            return @map.vpc.around[key];
 
-    vp.at_off = function(off_x, off_y) {
-        var key = F("{0}x{1}", [vp.col+off_x, vp.row+off_y]);
+        new_vp = new ViewPort(@map, _col_off, _row_off, @w, @h)
 
-        if(key in vp.map.vpc.around)
-            return vp.map.vpc.around[key];
+        new_vp.x = @x + (off_x * HEX_W);
+        new_vp.y = @y + (off_y * HEX_H);
 
-        var new_vp = new ViewPort(vp.map,
-                vp.col + off_x, vp.row + off_y,
-                vp.w, vp.h
-        );
-
-        new_vp.x = vp.x + (off_x * HEX_W);
-        new_vp.y = vp.y + (off_y * HEX_H);
-
+        # XXX: why not setting it back to vpc.around?
 
         return new_vp;
-    }
 
-    vp.right = function() {
-        return vp.at_off(vp.w, 0);
-    }
+    right: ->
+        return @at_off(@w, 0);
 
-    vp.bottom = function() {
-        return vp.at_off(0, vp.h);
-    }
+    bottom: ->
+        return @at_off(0, @h);
 
-    vp.draw = function(_id) {
-        if(vp._drawed == true)
-            return vp.show(_id);
+    draw: (_id) ->
+        if @_drawed == true
+            return @show(_id);
 
-        console.log(F("draw vp.col={0}, x={1}, vp.row={2}, y={3}", [vp.col, vp.x, vp.row, vp.y]));
+        console.log("draw vp #{@col} #{@w} #{@row} #{@h}")
 
-        var col, row;
-        vp._cache = vp.map.vpc.get_vp(vp.col, vp.row);
-        vp.tiles = vp._cache.vp;
+        @_cache = @map.vpc.get_vp(@col, @row);
+        @tiles = @_cache.vp;
 
-        for(col=vp.col; col<(vp.col+vp.w) ;col+=2) {
-            if(vp.map.cells[col] === undefined)
-                vp.map.cells[col] = [];
+        col = @col
+        while col<(@col+@w)
+            if !@map.cells[col]
+                @map.cells[col] = [];
 
-            for(row=vp.row; row<(vp.row+vp.h); row+=2) {
-                vp.draw_hex(col, row);
-            }
-        }
+            row = @row
+            while row<(@row+@h)
+                @draw_hex(col, row);
+                row += 2
 
-        vp._drawed = true;
-    }
+            col += 2
 
-    vp.draw_hex = function(col, row) {
+        @_drawed = true;
 
-        if((col % 4) != 0) {
+    draw_hex: (col, row) ->
+
+        if (col % 4) != 0
             row++;
-        }
-        var _col = col - vp.col,
-            _row = row - vp.row;
 
-        var x = _col * HEX_W;
-        var y = _row * HEX_H;
+        _col = col - @col
+        _row = row - @row
 
-        var hex = new Hex(x + vp.x, y + vp.y, HEX_W, HEX_H);
+        x = _col * HEX_W;
+        y = _row * HEX_H;
+
+        hex = new Hex(x + @x, y + @y, HEX_W, HEX_H);
+
+        ###
         var tile_info = vp.tiles[_col >> 1][_row >> 1],
             tile_typ, tile_frame=0;
 
@@ -88,28 +81,31 @@ var ViewPort = function(map, col, row, w, h) {
             hex.back_img_name = tile_info[0];
             hex.frame = tile_info[1];
         }
+        ###
+        hex.set_image('grass')
 
         hex.row = row;
         hex.col = col;
-        hex.map = vp.map;
-        hex.vp = vp;
+        hex.map = @map;
+        hex.vp = this
 
-        vp.map.cells[col][row] = hex;
+        @map.cells[col][row] = hex;
 
-        vp.hexes.push(hex);
+        @hexes.push(hex);
 
+        ###
         hex.draw();
         hex.free();
 
-        hex.back_img.node.onclick = function(e) {
+        hex.back_img.node.onclick = (e) ->
             console.log(F("hex: {0}x{1} in vp{2}=vp{3}",
                     [hex.col, hex.row, hex.vp.id, vp.id]));
             vp.click_hex(hex, e.button);
             __vp = vp;
-        }
+        ###
 
-    }
 
+    ###
     vp.click_hex = function(hex, button) {
 
         if(vp.map.changer === undefined) {
@@ -240,5 +236,4 @@ var ViewPort = function(map, col, row, w, h) {
         return ret;
     };
 
-    return vp;
-}
+    ###

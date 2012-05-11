@@ -1,131 +1,123 @@
-var Map = function(rows, cols) {
-    this.cells = [];
-    this.users = new Object();
-    this._user = 0;
+class MMap
+    constructor: (@rows, @cols) ->
+        @cells = [];
+        @users = new Object();
+        @_user = 0;
 
-    this.rows = rows;
-    this.cols = cols;
+        @width = Math.ceil(window.innerWidth/(cols/2)/HEX_W);
+        @height = Math.ceil(window.innerHeight/(rows/2)/HEX_H);
 
-    this.width = Math.ceil(window.innerWidth/(cols/2)/HEX_W);
-    this.height = Math.ceil(window.innerHeight/(rows/2)/HEX_H);
+        @_waits = 0;
 
-    this._waits = 0;
+        @shift_x = Math.round(cols/3);
+        @shift_y = Math.round(rows/3);
+        @vp = []
 
-    var shift_x = Math.round(cols/3);
-    var shift_y = Math.round(rows/3);
-
-    this.fire = function(_arg) {
-       var user =  this.users[_arg.uid];
+    fire: (_arg) ->
+       user =  @users[_arg.uid];
        user.fire();
-    };
 
-    this.err = function(msg) {
-        alert(msg);
-    }
+    err: (msg) -> alert msg
 
-    this.drop_user = function(_arg) {
-        var user =  this.users[_arg.uid];
+    drop_user: (_arg) ->
+        user =  @users[_arg.uid];
 
-        var hex = this.cells[user.x][user.y];
+        hex = @cells[user.x][user.y];
         hex.free();
 
         user.img.remove();
 
-        this.users[_arg.uid] = undefined;
-    };
+        @users[_arg.uid] = undefined;
 
-    this.set_self = function(_arg) {
-        this.user_self = _arg.uid;
-    };
 
-    this.add_user = function(_arg, y, img) {
-        var x ;
-        var uid;
+    set_self: (_arg) ->
+        @user_self = _arg.uid;
 
-        if (typeof(_arg) == 'object') {
+    add_user: (_arg, y, img) ->
+
+        if typeof(_arg) == 'object'
             x = _arg.x;
             y = _arg.y;
             img = _arg.char;
             uid = _arg.uid;
-        } else {
+        else
             x = _arg;
             uid = this._user;
-        }
 
-        if(this.users[uid])
+
+        if this.users[uid]
             return;
 
-        var user = new User(uid, x, y, img);
+        user = new User(uid, x, y, img)
         user.draw();
 
-        var hex = (this.cells[user.x] || [])[user.y];
-        this.users[uid] = user;
+        hex = (this.cells[user.x] || [])[user.y];
+        @users[uid] = user;
 
-        console.log(F("hex: {0}, {1}x{2}",
-                [hex, user.x, user.y]));
-
-        if(hex) {
+        if hex
             user.show(x, y, this.vp[0]);
 
             hex.use(user);
             user.hex = hex;
-        } else {
+        else
             user.hide();
-        }
-
 
         return user;
 
-    };
+    move: (_arg, new_x, new_y) ->
 
-    this.move = function(_arg, new_x, new_y) {
-
-        var user =  this.users[_arg.uid];
+        user =  @users[_arg.uid];
         new_x = _arg.x
         new_y = _arg.y;
 
-        if(this.lock) {
+        if this.lock
             return;
-        }
 
-        if(user.x!==undefined) {
-            var old = user.hex;
+        if user.x!=undefined
+            old = user.hex;
             old.free();
-        }
 
-        var next = null;
-        
-        var col = this.cells[new_x] || [];
-
+        next = null;
+        col = @cells[new_x] || [];
         next = col[new_y];
 
-        if(!next) {
+        if !next
             console.log("gone out");
             user.hide();
             return;
-        }
 
 
         console.log(F("move from {0}x{1} to {2}x{3}",
                     [user.x, user.y, next.col, next.row]));
 
-        if(user.x==undefined) {
-            if(!next.vp.hidden) {
+        if user.x==undefined
+            if !next.vp.hidden
                 user.show(new_x, new_y, next.vp);
                 next.use(user);
-            }
-        } else {
+
+        else
             user.move(new_x, new_y, next.vp);
 
             next.use(user);
-        }
 
-    };
+    draw: (ps) =>
+        console.log("draw #{this}..#{@vp}")
+        map_vp = @vp
+        ps.setup = () ->
+            ps.size($(window).width(), $(window).height())
+            ps.background(0)
 
-    this.recenter = function(move_dir) {
+        ps.draw = () =>
+            for vp in map_vp
+                for hex in vp.hexes
+                    if hex.taint
+                        hex.draw()
+
+    recenter: (move_dir) ->
         console.log("recenter");
 
-        var to_drop = [],
+        ###
+        to_drop = [],
             new_draw = [];
 
 
@@ -186,7 +178,4 @@ var Map = function(rows, cols) {
         }
 
         this.vp = map_vp;
-    };
-
-    return this;
-};
+        ###
