@@ -21,7 +21,9 @@ class Hex
         if (whom != undefined) && (whom.img != undefined)
            @img = whom.img;
 
-        whom.hex = hex;
+        whom.hex = this
+        if whom.draw
+            @taint = true
 
     free: ->
         if @used
@@ -29,11 +31,17 @@ class Hex
 
         @used = false
         @img = false
-        @tilted = true
+        @taint = true
 
     draw: () ->
         if ! @back_img.loaded
             return
 
         window.ps.image(@back_img, @x, @y - HEX_H)
+
+        if @used && @used.draw
+            ret = @used.draw()
+            if ! ret
+                return
+
         @taint = false

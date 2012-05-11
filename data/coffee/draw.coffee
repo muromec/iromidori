@@ -48,8 +48,6 @@ window.draw_map = (el) ->
         server.push({"ox": ox, "oy": oy, "url": "/move"})
 
     
-    ###
-
     key('l', () -> move(2, 1));
     key('o', () -> move(2, -1));
 
@@ -59,6 +57,7 @@ window.draw_map = (el) ->
     key('j', () -> move(0, 2));
     key('k', () -> move(0, -2));
 
+    ###
     key("up", () -> map.recenter(-map.width));
     key("down", () -> map.recenter(map.width));
     key("left", () -> map.recenter(-1));

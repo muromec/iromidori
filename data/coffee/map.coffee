@@ -55,7 +55,7 @@ class MMap
         @users[uid] = user;
 
         if hex
-            user.show(x, y, this.vp[0]);
+            user.show(@vp[0])
 
             hex.use(user);
             user.hex = hex;
@@ -76,6 +76,16 @@ class MMap
         if user.x!=undefined
             old = user.hex;
             old.free();
+            for xoff in [-2, 0, 2]
+                col = @cells[user.x + xoff] || []
+                if ! col
+                    break
+
+                # XXX: buggy tiles. should be [-1, 1]
+                for yoff in [-2, -1, 1, 2]
+                    _hex = col[user.y + yoff]
+                    if _hex
+                        _hex.taint = true
 
         next = null;
         col = @cells[new_x] || [];
@@ -86,15 +96,10 @@ class MMap
             user.hide();
             return;
 
-
-        console.log(F("move from {0}x{1} to {2}x{3}",
-                    [user.x, user.y, next.col, next.row]));
-
         if user.x==undefined
             if !next.vp.hidden
                 user.show(new_x, new_y, next.vp);
                 next.use(user);
-
         else
             user.move(new_x, new_y, next.vp);
 
