@@ -23,7 +23,7 @@ class Hex
 
         whom.hex = this
         if whom.draw
-            @taint = true
+            @taint = 2
 
     free: ->
         if @used
@@ -42,6 +42,10 @@ class Hex
         if @used && @used.draw
             ret = @used.draw()
             if ! ret
+                return
+
+            if @taint > 1
+                @taint -= 1
                 return
 
         @taint = false
