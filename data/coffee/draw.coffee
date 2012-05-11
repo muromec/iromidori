@@ -68,15 +68,17 @@ window.draw_map = (el) ->
         server.push({"url": "/fire"})
     )
 
-    server = new Server();
-    server.cb = (data) ->
+    ###
+    server_cb = (data) ->
         console.log("got "+data.fn)
         map[data.fn](data.data)
 
-    ###
+    server = new Server(server_cb)
+
     enter_now = (char_data) ->
+        console.log(char_data)
         server.connect()
-        server.push({"url": "/enter", "char_type": char_data.type})
+        server.push({"url": "/enter", "char_type": char_data})
 
 
     enter = new EnterControl(enter_now)

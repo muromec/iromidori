@@ -29,11 +29,14 @@ class EnterControl
         @dialog = $(html)
 
         $("body").append(@dialog)
-        $(".char_list img").on("click", @selected)
+        _selected = @selected
+        $(".char_list img").on("click", ->
+            typ = $(this).attr("typ")
+            _selected(typ)
+        )
 
-    selected: =>
-        char_data = $(this).attr("typ")
+    selected: (typ) =>
 
-        @cb(char_data);
+        @cb(typ);
 
         @dialog.remove();
