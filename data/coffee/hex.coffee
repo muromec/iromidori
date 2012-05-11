@@ -21,7 +21,7 @@ class Hex
         if (whom != undefined) && (whom.img != undefined)
            @img = whom.img;
 
-       whom.hex = hex;
+        whom.hex = hex;
 
     free: ->
         if @used

@@ -73,6 +73,7 @@ window.draw_map = (el) ->
         console.log("got "+data.fn)
         map[data.fn](data.data)
 
+    ###
     enter_now = (char_data) ->
         server.connect()
         server.push({"url": "/enter", "char_type": char_data.type})
@@ -80,4 +81,3 @@ window.draw_map = (el) ->
 
     enter = new EnterControl(enter_now)
     enter.fetch()
-    ###
