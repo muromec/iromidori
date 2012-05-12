@@ -42,6 +42,15 @@ class EventSocket(websocket.WebSocketHandler):
 
             self.cn.write_message(data)
 
+        def sched(self, delta, **kw):
+            import time
+            def send():
+                evapi(who=self, group=subs, **kw)
+
+            next_time = time.time() + delta
+
+            self.cn.io_loop.add_timeout(next_time, send)
+
     def open(self):
         self.state = self.State(self)
 

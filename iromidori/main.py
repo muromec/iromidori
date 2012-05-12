@@ -51,4 +51,6 @@ if __name__ == '__main__':
     ])
     http_server = HTTPServer(application)
     http_server.listen(31574)
-    IOLoop.instance().start()
+    ioloop = IOLoop.instance()
+    EventSocket.io_loop = ioloop
+    ioloop.start()
