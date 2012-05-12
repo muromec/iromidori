@@ -1,9 +1,10 @@
 from biribiri.chain.utils import view, upd_ctx
-from biribiri.chain import Derail
 
 from simplejson import dumps, dump, load
-from info import TILES
-from random import sample
+from iromidori.char import hp_check
+from iromidori import util
+from iromidori.util import err
+
 
 from vp import Vp
 COLS, ROWS = Vp.COLS, Vp.ROWS
@@ -11,16 +12,11 @@ COLS, ROWS = Vp.COLS, Vp.ROWS
 MAP = {
 }
 
-def err(msg):
-    def send_err(who, **kw):
-        who.send({"fn": "err", "data": msg})
-
-    raise Derail(send_err)
 
 @view(url='/move')
 def move(**kw):
     return [
-            group_send,
+            util.group_send,
             notify_move,
             do_move,
             hp_check,
@@ -43,9 +39,6 @@ def _vp_get(col, row, **kw):
 
     return vp_get(col=vp_x, row=vp_y, **kw)
 
-def hp_check(who, **kw):
-    if who.dead:
-        return err("You are dead")
 
 
 def point_check(point, point_state, who, **kw):
@@ -90,10 +83,6 @@ def notify_move(who, **kw):
             "uid": who.uid,
         }
     }, None
-
-
-def group_send(send_out, group, **kw):
-    group.send(send_out)
 
 
 @view(url="/map/vp")

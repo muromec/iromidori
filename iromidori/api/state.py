@@ -1,5 +1,7 @@
-from biribiri.chain.utils import view
+from biribiri.chain.utils import view, upd_ctx
 from uuid import uuid4
+from iromidori import util
+from iromidori.char import hp_check
 
 @view(url='/enter')
 def enter(who, group, char_type, char_name, **kw):
@@ -46,33 +48,44 @@ def out(who, group, **kw):
 
 @view(url="/fire")
 def fire(who, group, point, **kw):
+    return [
+            util.group_send,
+            notify_fire,
+            do_fire,
+            hp_check,
+    ]
+
+
+@upd_ctx("target")
+def do_fire(group, point, who, **kw):
     for player in group.subs:
         if player.dead:
             continue
 
-        print [player.x, player.y], point
         if [player.x, player.y] == point:
-            'found target!'
             target_p = player
             break
     else:
-        target = None
         target_p = None
-        'nobody affected'
 
     if target_p:
         player.stat['hp'] -= 10
-        target = {
-            "uid": player.uid,
-            "hp": player.stat['hp'],
-            "dead": player.dead,
-        }
 
-    group.send({
+    return target_p, None
+ 
+@upd_ctx("send_out")
+def notify_fire(who, target, point, **kw):
+    target_o = {
+        "uid": target.uid,
+        "hp": target.stat['hp'],
+        "dead": target.dead,
+    } if target else None
+
+    return {
         "fn": "fire",
         "data": {
             "who": who.uid,
-            "target": target,
+            "target": target_o,
             "point": point,
         }
-    })
+    }, None
