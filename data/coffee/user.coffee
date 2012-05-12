@@ -6,23 +6,24 @@ class User
         @off_x = 0
         @off_y = 0
         @taint = true
-        @li = 100
+        @_cycle_id = null
 
     fire: ->
-        @li_to =
+        li_to =
             x: window.fg.mouseX
             y: window.fg.mouseY
 
         pos = @where()
 
-        if @li_to.x < pos.x
+        if li_to.x < pos.x
             @img.dir(0)
         else
             @img.dir(1)
 
         @img.sprite_cycle("fire", 300, true);
-        @li = 0
         @taint = true
+
+        li = new Lighting(pos, li_to, this)
 
     where: ->
         x = (@x - @vp.col) * HEX_W;
@@ -100,8 +101,6 @@ class User
         char_w = 100
         char_h = 20
 
-        @lighting()
-
         ###
         # XXX: kill kitamuraj for this.
         # XXX: also need offset map
@@ -123,30 +122,5 @@ class User
         pos = @where()
         
         window.fg.image(@img.img, pos.x + @off_x, pos.y - char_h + @off_y)
-        if ! @_cycle_id and ! @img._cycle_id and @li > 30
-            @taint_ = false
-
-    lighting: ->
-
-        if @li > 30
-            window.map.clear = true
-            return
-
-        pos = @where()
-        window.map.stroke(Math.random()*256)
-        window.map.strokeWeight(Math.floor(Math.random()*10)/3)
-
-        off_x = Math.floor(Math.random()*9)
-        off_y = Math.floor(Math.random()*15)
-
-        if @img._dir
-            off_x += HEX_W_FULL
-        off_y -= HEX_H / 2
-
-        off_x_2 = Math.floor(Math.random()*HEX_W_FULL)
-        off_y_2 = Math.floor(Math.random()*HEX_H)
-
-        window.map.line(pos.x + off_x, pos.y+ off_y,
-            @li_to.x + off_x_2, @li_to.y + off_y_2)
-
-        @li += 1
+        if ! (@_cycle_id or @img._cycle_id)
+            @taint = false
