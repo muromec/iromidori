@@ -6,7 +6,7 @@ class Hex
     
     set_image: (@back_img_name) ->
         img = "/img/tile/#{ @back_img_name }_0.png"
-        @back_img = window.ps.loadImage(img)
+        @back_img = window.map.loadImage(img)
         @taint = true
 
 
@@ -37,15 +37,6 @@ class Hex
         if ! @back_img.loaded
             return
 
-        window.ps.image(@back_img, @x, @y - HEX_H)
-
-        if @used && @used.draw
-            ret = @used.draw()
-            if ! ret
-                return
-
-            if @taint > 1
-                @taint -= 1
-                return
+        window.map.image(@back_img, @x, @y - HEX_H)
 
         @taint = false

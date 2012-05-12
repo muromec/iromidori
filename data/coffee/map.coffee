@@ -75,7 +75,7 @@ class MMap
 
         if user.x!=undefined
             old = user.hex;
-            old.free();
+            taints = [old]
             for xoff in [-2, 0, 2]
                 col = @cells[user.x + xoff] || []
                 if ! col
@@ -85,7 +85,9 @@ class MMap
                 for yoff in [-2, -1, 1, 2]
                     _hex = col[user.y + yoff]
                     if _hex
-                        _hex.taint = true
+                        taints.push(_hex)
+        else
+            old = false
 
         next = null;
         col = @cells[new_x] || [];
@@ -101,22 +103,44 @@ class MMap
                 user.show(new_x, new_y, next.vp);
                 next.use(user);
         else
-            user.move(new_x, new_y, next.vp);
+            user.move(new_x, new_y, next.vp, taints || []);
+
+            if old
+                old.free();
 
             next.use(user);
 
-    draw: (ps) =>
+    draw_map: (ps) =>
         console.log("draw #{this}..#{@vp}")
         map_vp = @vp
         ps.setup = () ->
             ps.size($(window).width(), $(window).height())
             ps.background(0)
+            ps.frameRate(4)
 
         ps.draw = () =>
             for vp in map_vp
                 for hex in vp.hexes
                     if hex.taint
                         hex.draw()
+
+    draw_fg: (ps) =>
+        console.log("draw fg #{this}..#{@vp}")
+        map_vp = @vp
+        ps.setup = () ->
+            ps.size($(window).width(), $(window).height())
+            ps.background(0, 0.5)
+
+        ps.draw = () =>
+            clear = true
+            for user_id in Object.keys(@users)
+                if @users[user_id].taint
+
+                    if clear
+                        ps.background(0, 0.5)
+                        clear = false
+
+                    @users[user_id].draw()
 
     recenter: (move_dir) ->
         console.log("recenter");

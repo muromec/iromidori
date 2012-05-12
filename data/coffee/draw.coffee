@@ -11,9 +11,8 @@ window.draw_map = (el) ->
     map = new MMap rows, cols
     map.vpc = new VPCache
 
-    canvas = document.getElementById "map"
-    processing = new Processing(canvas, map.draw)
-    window.ps = processing
+    window.fg = new Processing("chars", map.draw_fg)
+    window.map = new Processing("map", map.draw_map)
 
     console.log("vps: #{ map.width }x#{ map.height}")
 

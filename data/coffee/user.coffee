@@ -3,6 +3,9 @@ class User
         @hidden = true
         img = "/img/char/#{ @img_name }_0.png"
         @img = new Sprite("char", @img_name, 0)
+        @off_x = 0
+        @off_y = 0
+        @taint = true
 
     fire: ->
         @img.sprite_cycle("fire", 300, true);
@@ -23,7 +26,7 @@ class User
     hide: ->
         @hidden = true;
 
-    move: (new_x, new_y, vp) ->
+    move: (new_x, new_y, vp, taints) ->
 
         #sprite_x_off = @img._sprite_x_off;
 
@@ -35,14 +38,44 @@ class User
             sprite_x_off = 0;
             @img.dir(0);
 
-        @img.sprite_cycle("go", 150, true);
+        @img.sprite_cycle("go", 150)
+        @taint = true
 
-        #var old_where = this.where(vp);
+        old_pos = @where()
 
         @x = new_x;
         @y = new_y;
 
-        #var where = this.where(vp);
+        new_pos = @where()
+        @off_x = old_pos.x - new_pos.x
+        @off_y = old_pos.y - new_pos.y
+
+        cycle_tick = =>
+            if @off_y > 0
+                @off_y -= 1
+            else if @off_y < 0
+                @off_y += 1
+
+            if @off_x > 0
+                @off_x -= 1
+            else if @off_x < 0
+                @off_x += 1
+
+            if @off_x==0 and @off_y ==0
+                clearInterval(@_cycle_id)
+                @_cycle_id = null
+
+                @img.sprite_cycle_stop()
+
+            """
+            for hex in taints
+                hex.taint = true
+            """
+            false
+
+        if ! @_cycle_id
+            @_cycle_id = setInterval(cycle_tick, 15)
+
 
 
     draw: ->
@@ -73,7 +106,6 @@ class User
         
         pos = @where()
         
-        window.ps.image(@img.img, pos.x, pos.y - char_h)
-
-        console.log("draw user")
-        return ! @img._cycle_id
+        window.fg.image(@img.img, pos.x + @off_x, pos.y - char_h + @off_y)
+        if ! @_cycle_id and ! @img._cycle_id
+            @taint = false

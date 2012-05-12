@@ -2,11 +2,10 @@
     position: fixed;
     right: 20px;
     background: white;
+    z-index: 10;
 }
 
-#map {
+canvas {
     float: left;
     overflow: hidden;
-    width: 100%;
-    height: 100%;
 }

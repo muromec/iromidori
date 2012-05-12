@@ -27,10 +27,11 @@ class Sprite
 
 
     sprite_cycle: (state, ms, stop) ->
-        @_cycles += 1
 
-        if @_cycles > 1
+        if @_cycles > 0
             return;
+
+        @_cycles += 1
 
         @sprite(state);
 
@@ -43,10 +44,7 @@ class Sprite
         @_cycle_id = window.setInterval(cycle_tick, ms)
 
     sprite_cycle_stop: ->
-        @_cycles -= 1
-
-        if @_cycles > 0
-            return;
+        @_cycles = 0
 
         clearInterval(@_cycle_id);
 
@@ -55,7 +53,7 @@ class Sprite
 
 
     sprite: (state) ->
-        @img = window.ps.loadImage(@path(state))
+        @img = window.fg.loadImage(@path(state))
 
     dir: (dir) ->
         @_dir = dir
