@@ -23,6 +23,7 @@ def move(**kw):
             group_send,
             notify_move,
             do_move,
+            hp_check,
             point_check,
             point_get,   # ^
             _vp_get,     # ^
@@ -41,6 +42,10 @@ def _vp_get(col, row, **kw):
     vp_x = col / COLS * COLS
 
     return vp_get(col=vp_x, row=vp_y, **kw)
+
+def hp_check(who, **kw):
+    if who.dead:
+        return err("You are dead")
 
 
 def point_check(point, point_state, who, **kw):
