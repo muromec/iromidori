@@ -74,17 +74,6 @@ class ViewPort
         hex.vp = this
         hex.map = @map;
 
-        ###
-        var tile_info = vp.tiles[_col >> 1][_row >> 1],
-            tile_typ, tile_frame=0;
-
-        if(typeof(tile_info) == 'string') {
-            hex.back_img_name = tile_info;
-        } else {
-            hex.back_img_name = tile_info[0];
-            hex.frame = tile_info[1];
-        }
-        ###
         if @tiles
             tile_info = @tiles[_col >> 1][_row >> 1]
             if typeof(tile_info) == 'string'
