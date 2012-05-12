@@ -17,12 +17,15 @@ class MMap
 
     fire: (_arg) ->
        user =  @users[_arg.who];
-       user.fire(_arg)
-       console.log(_arg)
+
+       [col, row] = _arg.point
+       hex = @cells[col][row]
 
        if _arg.target
            console.log("fired at target")
            target = @users[_arg.target.uid]
+
+           # move out
            target.stat.hp = _arg.target.hp
            target.stat.dead = _arg.target.dead
 
@@ -30,6 +33,8 @@ class MMap
                console.log("oh, its me! #{target.stat.hp}")
                @_self_stat.render()
                @_self_stat.warning()
+
+       user.fire(hex)
 
     err: (msg) ->
         new ErrBox(msg)

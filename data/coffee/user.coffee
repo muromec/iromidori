@@ -8,10 +8,8 @@ class User
         @taint = true
         @_cycle_id = null
 
-    fire: ->
-        li_to =
-            x: window.fg.mouseX
-            y: window.fg.mouseY
+    fire: (hex) ->
+        li_to = hex.where()
 
         pos = @where()
 

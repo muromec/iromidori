@@ -49,3 +49,9 @@ class Hex
         window.map.image(@back_img, @x + @vp.x, @y + @vp.y - HEX_H)
 
         @taint = false
+
+    where: ->
+        return {
+            x: @x + @vp.x,
+            y: @y + @vp.y - HEX_H,
+        }
