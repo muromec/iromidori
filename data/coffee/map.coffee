@@ -250,8 +250,8 @@ class MMap
     current_hex: ->
         vp = @vp[0]
 
-        x = window.fg.mouseX
-        y = window.fg.mouseY
+        x = window.mouseX
+        y = window.mouseY
 
         col = Math.floor(x / HEX_H) + @vp[0].col
         row = Math.floor(y / HEX_W) + @vp[0].row

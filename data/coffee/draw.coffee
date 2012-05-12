@@ -4,6 +4,12 @@ HEX_H = 24;
 
 window.draw_map = (el) ->
 
+    canvas_pos = $("canvas").position()
+    $(document).mousemove( (e) ->
+      window.mouseX = e.pageX - canvas_pos.left
+      window.mouseY = e.pageY - canvas_pos.top
+
+    )
     
     rows = 24
     cols = 32
