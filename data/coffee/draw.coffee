@@ -16,27 +16,7 @@ window.draw_map = (el) ->
 
     console.log("vps: #{ map.width }x#{ map.height}")
 
-    vp = new ViewPort map, 0, 0, cols/2, rows/2
-    vp.id = 0;
-
-    map.vp.push(vp)
-
-    while map.vp.length < (map.width * map.height)
-
-        if (vp.id % map.width) < (map.width-1)
-            console.log("row+ "+vp.id);
-            vp = vp.right();
-        else
-            console.log("next row "+vp.id);
-            vp = map.vp[map.vp.length - map.width].bottom();
-
-        vp.id = map.vp.length;
-        map.vp.push(vp);
-
-
-    for vp in map.vp
-        vp.draw()
-        vp.fetch()
+    map.setup_vp(0, 0)
 
     move = (ox, oy) ->
         server.push({"ox": ox, "oy": oy, "url": "/move"})
@@ -55,6 +35,7 @@ window.draw_map = (el) ->
     key("down", () -> map.recenter(map.width));
     key("left", () -> map.recenter(-1));
     key("right", () -> map.recenter(1));
+    key("c", () -> map.recenter(0));
 
     key('f', () ->
         hex = map.current_hex()

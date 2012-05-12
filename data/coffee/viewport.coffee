@@ -7,6 +7,7 @@ class ViewPort
         @y = 0
 
         key = "#{@col}x#{@row}"
+        console.log("create vp #{@col}x#{@row}")
 
         @map.vpc.around[key] = this
         @key = key
@@ -18,22 +19,26 @@ class ViewPort
         key = "#{_col_off}x#{_row_off}"
 
         if @map.vpc.around[key]
-            return @map.vpc.around[key];
-
-        new_vp = new ViewPort(@map, _col_off, _row_off, @w, @h)
+            new_vp = @map.vpc.around[key];
+        else
+            new_vp = new ViewPort(@map, _col_off, _row_off, @w, @h)
 
         new_vp.x = @x + (off_x * HEX_W);
         new_vp.y = @y + (off_y * HEX_H);
-
-        # XXX: why not setting it back to vpc.around?
 
         return new_vp;
 
     right: ->
         return @at_off(@w, 0);
 
+    left: ->
+        return @at_off(-@w, 0);
+
     bottom: ->
         return @at_off(0, @h);
+
+    top: ->
+        return @at_off(0, -@h);
 
     draw: (_id) ->
         if @_drawed == true

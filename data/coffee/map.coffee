@@ -127,6 +127,8 @@ class MMap
 
             next.use(user);
 
+        user.vp = next.vp
+
     draw_map: (ps) =>
         console.log("draw #{this}..#{@vp} #{@ri}")
         map = this
@@ -169,80 +171,89 @@ class MMap
             for user_id in Object.keys(@users)
                 @users[user_id].draw()
 
+    _recenter: ->
+        window.map.clear = true
+        for user_id in Object.keys(@users)
+            user = @users[user_id]
+            user.taint = true
+
     recenter: (move_dir) ->
         console.log("recenter #{move_dir}");
 
         to_drop = []
         new_draw = []
 
-        if move_dir == 1
+        if move_dir == 0
+            user = @users[@user_self]
+            if user.vp.id == @vp[0].id
+                return
+
+            @setup_vp(user.vp.col, user.vp.row)
+        
+            return @_recenter()
+
+        else if move_dir == 1
             console.log("move right")
-            id = 0
-            while id < @height
-                to_drop[id * @width] = true;
-                new_draw[(id * @width) + @width - 1] = true;
-                id+=1
+            vp = @vp[1]
+            @setup_vp(vp.col, vp.row)
+            return @_recenter()
 
         else if move_dir==-1
             console.log("move left");
-            id = 0
-            while id < @height
-                new_draw[id * @width] = true;
-                to_drop[(id * @width) + @width - 1] = true;
-                id +=1
+            vp = @vp[0].left()
+            @setup_vp(vp.col, vp.row)
+            return @_recenter()
+
         else if move_dir==@width
             console.log("move down");
-            id = 0
-
-            while id < @width
-                to_drop[id] = true;
-                new_draw[@vp.length - 1 - id] = true;
-                id += 1
+            vp = @vp[0].bottom()
+            @setup_vp(vp.col, vp.row)
+            return @_recenter()
 
         else if move_dir==-@width
             console.log("move up");
-            id = 0
+            vp = @vp[0].top()
+            @setup_vp(vp.col, vp.row)
+            return @_recenter()
 
-            while id < @width
-                to_drop[@vp.length - 1 - id] = true;
-                new_draw[id] = true;
+    setup_vp: (col, row) ->
+        for vp in @vp
+            console.log("hide #{vp.col}x#{vp.row}")
+            vp.hide()
 
-                id+=1
+        key = "#{col}x#{row}"
+        if @vpc.around[key]
+            vp = @vpc.around[key]
+            vp.x = 0
+            vp.y = 0
+        else
+            vp = new ViewPort this, col, row, @cols/2, @rows/2
 
-        map_vp = [];
+        vp.id = 0;
 
-        id = 0
-        while id < @vp.length
+        map_vp = [vp]
 
-            vp = @vp[id]
+        console.log("now add")
 
-            if to_drop[id] == true
-                console.log("hide #{id}")
-                vp.hide();
+        while map_vp.length < (@width * @height)
 
-                id+= 1
-                continue;
+            if (vp.id % @width) < (@width-1)
+                console.log("row+ "+vp.id);
+                vp = vp.right();
+            else
+                console.log("next row "+vp.id);
+                vp = map_vp[map_vp.length - @width].bottom();
 
-            console.log("move #{id} draw=#{new_draw[id]}")
+            vp.id = map_vp.length;
+            map_vp.push(vp);
 
-            _vp = vp.move(move_dir, !new_draw[id]);
-            map_vp[vp.id] = vp;
 
-            if new_draw[id]
-                _vp.draw(id);
-                console.log("wanna fetch #{_vp.col}x#{_vp.row}")
-                _vp.fetch()
+        for vp in map_vp
+            vp.draw()
+            vp.fetch()
 
-                map_vp[_vp.id] = _vp;
+        @vp = map_vp
 
-            id += 1
-
-        @vp = map_vp;
-
-        window.map.clear = true
-
-        for user_id in Object.keys(@users)
-            @users[user_id].taint = true
 
     current_hex: ->
         vp = @vp[0]
@@ -250,8 +261,8 @@ class MMap
         x = window.fg.mouseX
         y = window.fg.mouseY
 
-        col = Math.floor(x / HEX_H)
-        row = Math.floor(y / HEX_W)
+        col = Math.floor(x / HEX_H) + @vp[0].col
+        row = Math.floor(y / HEX_W) + @vp[0].row
 
         if col % 2
             col -= 1
