@@ -180,41 +180,24 @@ class MMap
     recenter: (move_dir) ->
         console.log("recenter #{move_dir}");
 
-        to_drop = []
-        new_draw = []
-
         if move_dir == 0
             user = @users[@user_self]
             if user.vp.id == @vp[0].id
                 return
 
-            @setup_vp(user.vp.col, user.vp.row)
-        
-            return @_recenter()
+            vp = user.vp
 
         else if move_dir == 1
-            console.log("move right")
             vp = @vp[1]
-            @setup_vp(vp.col, vp.row)
-            return @_recenter()
-
         else if move_dir==-1
-            console.log("move left");
             vp = @vp[0].left()
-            @setup_vp(vp.col, vp.row)
-            return @_recenter()
-
         else if move_dir==@width
-            console.log("move down");
             vp = @vp[0].bottom()
-            @setup_vp(vp.col, vp.row)
-            return @_recenter()
-
         else if move_dir==-@width
-            console.log("move up");
             vp = @vp[0].top()
-            @setup_vp(vp.col, vp.row)
-            return @_recenter()
+
+        @setup_vp(vp.col, vp.row)
+        return @_recenter()
 
     setup_vp: (col, row) ->
         for vp in @vp
