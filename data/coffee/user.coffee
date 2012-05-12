@@ -98,6 +98,9 @@ class User
         if ! @img.img.loaded
             return
 
+        if @vp.hidden
+            return
+
         char_w = 100
         char_h = 20
 

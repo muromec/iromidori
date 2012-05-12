@@ -8,4 +8,6 @@
 canvas {
     float: left;
     overflow: hidden;
+    width: 98%;
+    height: 98%;
 }

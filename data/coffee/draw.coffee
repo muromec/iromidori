@@ -33,15 +33,10 @@ window.draw_map = (el) ->
         vp.id = map.vp.length;
         map.vp.push(vp);
 
-    draw_vp = (vp) ->
-        map.vpc.prefetch(vp.col, vp.row, () ->
-            vp.draw()
-         #   vp.prefetch_around()
-        )
-
 
     for vp in map.vp
-        draw_vp(vp)
+        vp.draw()
+        vp.fetch()
 
     move = (ox, oy) ->
         server.push({"ox": ox, "oy": oy, "url": "/move"})
@@ -56,13 +51,11 @@ window.draw_map = (el) ->
     key('j', () -> move(0, 2));
     key('k', () -> move(0, -2));
 
-    ###
     key("up", () -> map.recenter(-map.width));
     key("down", () -> map.recenter(map.width));
     key("left", () -> map.recenter(-1));
     key("right", () -> map.recenter(1));
 
-    ###
     key('f', () ->
         server.push({"url": "/fire"})
     )

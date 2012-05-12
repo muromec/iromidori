@@ -42,7 +42,8 @@ class ViewPort
         console.log("draw vp #{@col} #{@w} #{@row} #{@h}")
 
         @_cache = @map.vpc.get_vp(@col, @row);
-        @tiles = @_cache.vp;
+        if @_cache
+            @tiles = @_cache.vp;
 
         col = @col
         while col<(@col+@w)
@@ -69,7 +70,9 @@ class ViewPort
         x = _col * HEX_W;
         y = _row * HEX_H;
 
-        hex = new Hex(x + @x, y + @y, HEX_W, HEX_H);
+        hex = new Hex(x, y, HEX_W, HEX_H);
+        hex.vp = this
+        hex.map = @map;
 
         ###
         var tile_info = vp.tiles[_col >> 1][_row >> 1],
@@ -82,16 +85,46 @@ class ViewPort
             hex.frame = tile_info[1];
         }
         ###
-        hex.set_image('grass')
+        if @tiles
+            tile_info = @tiles[_col >> 1][_row >> 1]
+            if typeof(tile_info) == 'string'
+                tile_typ = tile_info
+            else
+                tile_typ = tile_info[0]
+
+            hex.set_image(tile_info)
+        else
+            hex.set_image(null)
 
         hex.row = row;
         hex.col = col;
-        hex.map = @map;
-        hex.vp = this
 
         @map.cells[col][row] = hex;
 
         @hexes.push(hex);
+
+    fetch: ->
+        @map.vpc.prefetch(@col, @row, @tiles_reset)
+
+    tiles_reset: =>
+        @_cache = @map.vpc.get_vp(@col, @row);
+        if @_cache
+            @tiles = @_cache.vp;
+
+        console.log("reset #{@col}x#{@row}")
+
+        for hex in @hexes
+               
+            _col = hex.col - @col
+            _row = hex.row - @row
+     
+            tile_info = @tiles[_col >> 1][_row >> 1]
+            if typeof(tile_info) == 'string'
+                tile_typ = tile_info
+            else
+                tile_typ = tile_info[0]
+
+            hex.set_image(tile_typ)
 
         ###
         hex.draw();
@@ -139,101 +172,40 @@ class ViewPort
 
 
     }
+    ###
+    
+    hide: ->
+        @hidden = true
 
-    vp.hide = function() {
-        for(var id=0; id<vp.hexes.length; id++) {
-            var hex=vp.hexes[id];
+    show: ->
+        @hidden = false
 
-            hex.hide();
-        }
-        vp._id = vp.id;
-        vp.hidden = true;
-    }
+    move: (dir, skip_new) ->
+        off_x=0
+        off_y=0
 
-    vp.show = function(_id) {
-        for(var id=0; id<vp.hexes.length; id++) {
-            var hex=vp.hexes[id];
+        if dir==-1
+            off_x = @w
+        else if dir==1
+            off_x = -@w
+        else if dir==-@map.width
+            off_y = @h;
+        else if dir==@map.width
+            off_y = -@h;
 
-            hex.show();
+        # replace
+        if skip_new
+            new_vp = null
+        else
+            new_vp = @at_off(-off_x, -off_y);
 
-        }
-        vp.hidden = false;
-    }
-
-    vp.foreach = function(f) {
-        for(var id=0; id<vp.hexes.length; id++) {
-            f(vp.hexes[id])
-        }
-    }
-
-    vp.move = function(dir, skip_new) {
-        var off_x=0, off_y=0;
-        console.log(F("move {0} dir {1} ", [vp.key, dir]));
-
-        if(dir==-1)
-            off_x = vp.w;
-        if(dir==1)
-            off_x = -vp.w;
-        if(dir==-vp.map.width)
-            off_y = vp.h;
-        if(dir==vp.map.width)
-            off_y = -vp.h;
-
-        for(var id=0; id<vp.hexes.length; id++) {
-            var hex=vp.hexes[id];
-
-            hex.move(off_x * HEX_W, off_y * HEX_H);
-        }
-
-        // replace
-        if(!skip_new) {
-            var new_vp = vp.at_off(-off_x, -off_y);
-
-            new_vp.x = vp.x;
-            new_vp.y = vp.y;
-            new_vp.id = vp.id;
-        }
+            new_vp.x = @x;
+            new_vp.y = @y;
+            new_vp.id = @id;
 
 
-        vp.id -= dir;
-        vp.x += off_x * HEX_W;
-        vp.y += off_y * HEX_H;
-
-
+        @id -= dir;
+        @x += off_x * HEX_W;
+        @y += off_y * HEX_H;
 
         return new_vp;
-    }
-
-    vp.prefetch_around = function() {
-        var vpc = vp.map.vpc;
-
-        vpc.prefetch(vp.col+vp.w, vp.row+vp.h);
-        vpc.prefetch(vp.col+vp.w, vp.row-vp.h);
-        vpc.prefetch(vp.col-vp.w, vp.row+vp.h);
-        vpc.prefetch(vp.col-vp.w, vp.row-vp.h);
-
-        vpc.prefetch(0, vp.row+vp.h);
-        vpc.prefetch(0, vp.row-vp.h);
-        vpc.prefetch(vp.col+vp.w, 0);
-        vpc.prefetch(vp.col-vp.w, 0);
-    }
-
-    vp.get_tiles = function() {
-        var ret = [],
-            col = [];
-
-        vp.foreach(function(hex) {
-
-            col.push(hex.back_img.name);
-
-            if(col.length == vp.h/2) {
-                ret.push(col);
-                col = [];
-            }
-
-        })
-
-        return ret;
-    };
-
-    ###

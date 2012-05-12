@@ -111,8 +111,8 @@ class MMap
             next.use(user);
 
     draw_map: (ps) =>
-        console.log("draw #{this}..#{@vp}")
-        map_vp = @vp
+        console.log("draw #{this}..#{@vp} #{@ri}")
+        map = this
         ps.setup = () ->
             ps.size($(window).width(), $(window).height())
             ps.background(0)
@@ -120,7 +120,10 @@ class MMap
             ps.clear = true
 
         ps.draw = () =>
-            for vp in map_vp
+            for vp in map.vp
+                if vp.hidden
+                    continue
+
                 for hex in vp.hexes
                     if hex.taint or ps.clear
                         hex.draw()
@@ -136,78 +139,90 @@ class MMap
 
         ps.draw = () =>
             clear = true
+            taint = 0
             for user_id in Object.keys(@users)
-                if @users[user_id].taint
+                taint = taint || @users[user_id].taint
+                if taint
+                    break
 
-                    if clear
-                        ps.background(0, 0.5)
-                        clear = false
+            if not taint
+                return
 
-                    @users[user_id].draw()
+            ps.background(0, 0.5)
+            for user_id in Object.keys(@users)
+                @users[user_id].draw()
 
     recenter: (move_dir) ->
-        console.log("recenter");
+        console.log("recenter #{move_dir}");
 
-        ###
-        to_drop = [],
-            new_draw = [];
+        to_drop = []
+        new_draw = []
 
+        if move_dir == 1
+            console.log("move right")
+            id = 0
+            while id < @height
+                to_drop[id * @width] = true;
+                new_draw[(id * @width) + @width - 1] = true;
+                id+=1
 
-        if(move_dir==this.width) {
+        else if move_dir==-1
+            console.log("move left");
+            id = 0
+            while id < @height
+                new_draw[id * @width] = true;
+                to_drop[(id * @width) + @width - 1] = true;
+                id +=1
+        else if move_dir==@width
             console.log("move down");
-            for(var id=0; id<this.width; id++) {
+            id = 0
+
+            while id < @width
                 to_drop[id] = true;
-                new_draw[this.vp.length - 1 - id] = true;
-            }
+                new_draw[@vp.length - 1 - id] = true;
+                id += 1
 
-        } else if(move_dir==-this.width) {
+        else if move_dir==-@width
             console.log("move up");
+            id = 0
 
-            for(var id=0; id<this.width; id++) {
-                to_drop[this.vp.length - 1 - id] = true;
+            while id < @width
+                to_drop[@vp.length - 1 - id] = true;
                 new_draw[id] = true;
-            }
 
-        } else if(move_dir==1) {
-            console.log("move right ");
+                id+=1
 
-            for(var id=0; id<this.height; id++) {
-                to_drop[id * this.width] = true;
-                new_draw[(id * this.width) + this.width -1] = true;
-            }
-        } else if(move_dir==-1) {
-             console.log("move left");
-            for(var id=0; id<this.height; id++) {
-                new_draw[id * this.width] = true;
-                to_drop[(id * this.width) + this.width -1] = true;
-            }
-        }
+        map_vp = [];
 
-        console.log(F("move dir {0}", [move_dir]));
-        console.log( new_draw);
-        var map_vp = [];
+        id = 0
+        while id < @vp.length
 
-        for(var id=0; id<this.vp.length; id++) {
+            vp = @vp[id]
 
-            var vp = this.vp[id], _vp;
-            if(to_drop[id] == true) {
-                console.log(F("hide {0}", [id]));
-
+            if to_drop[id] == true
+                console.log("hide #{id}")
                 vp.hide();
-                continue;
-            }
 
-            console.log(F("move {0} draw={1}", [id, new_draw[id]]));
+                id+= 1
+                continue;
+
+            console.log("move #{id} draw=#{new_draw[id]}")
+
             _vp = vp.move(move_dir, !new_draw[id]);
             map_vp[vp.id] = vp;
 
-            if(new_draw[id]) {
+            if new_draw[id]
                 _vp.draw(id);
-                _vp.prefetch_around();
+                console.log("wanna fetch #{_vp.col}x#{_vp.row}")
+                _vp.fetch()
 
                 map_vp[_vp.id] = _vp;
-            }
-        }
 
-        this.vp = map_vp;
-        ###
+            id += 1
+
+        @vp = map_vp;
+
+        window.map.clear = true
+
+        for user_id in Object.keys(@users)
+            @users[user_id].taint = true

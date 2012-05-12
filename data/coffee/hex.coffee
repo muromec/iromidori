@@ -5,10 +5,15 @@ class Hex
         @taint = true
     
     set_image: (@back_img_name) ->
+        if @back_img_name == null
+            @back_img_name = "grass"
+            @gray = true
+        else
+            @gray = false
+
         img = "/img/tile/#{ @back_img_name }_0.png"
         @back_img = window.map.loadImage(img)
         @taint = true
-
 
     use: (whom) ->
 
@@ -35,8 +40,12 @@ class Hex
 
     draw: () ->
         if ! @back_img.loaded
+            @taint = true
             return
 
-        window.map.image(@back_img, @x, @y - HEX_H)
+        if @gray
+            @back_img.filter(window.map.GRAY)
+
+        window.map.image(@back_img, @x + @vp.x, @y + @vp.y - HEX_H)
 
         @taint = false
