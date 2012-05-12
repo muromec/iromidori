@@ -1,13 +1,38 @@
 .char_list, .tiles {
-    position: fixed;
-    right: 20px;
-    background: white;
     z-index: 10;
+    text-align: center
+
+    width: 150px;
+    position: relative;
+    left: 50%;
+    margin-left: -50px;
+    top: 70px;
+
 }
+
+.char_list_in {
+    background-color: white;
+    width: 150px;
+}
+
+.char_s {
+    float: left;
+    padding: 10px;
+}
+
 
 canvas {
     float: left;
     overflow: hidden;
     width: 98%;
     height: 98%;
+    top: 40px;
+}
+
+.user_stat {
+    height: 35px;
+    display: none;
+}
+.warning {
+    background-color: red;
 }

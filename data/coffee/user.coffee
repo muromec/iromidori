@@ -1,5 +1,5 @@
 class User
-    constructor: (@uid, @x, @y, @img_name) ->
+    constructor: (@uid, @x, @y, @img_name, @name, @stat) ->
         @hidden = true
         img = "/img/char/#{ @img_name }_0.png"
         @img = new Sprite("char", @img_name, 0)
@@ -42,7 +42,7 @@ class User
     hide: ->
         @hidden = true;
 
-    move: (new_x, new_y, vp, taints) ->
+    move: (new_x, new_y, vp) ->
 
         #sprite_x_off = @img._sprite_x_off;
 
@@ -82,12 +82,6 @@ class User
                 @_cycle_id = null
 
                 @img.sprite_cycle_stop()
-
-            """
-            for hex in taints
-                hex.taint = true
-            """
-            false
 
         if ! @_cycle_id
             @_cycle_id = setInterval(cycle_tick, 15)

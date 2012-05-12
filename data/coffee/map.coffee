@@ -12,10 +12,24 @@ class MMap
         @shift_x = Math.round(cols/3);
         @shift_y = Math.round(rows/3);
         @vp = []
+        
+        window.mmap = this
 
     fire: (_arg) ->
-       user =  @users[_arg.uid];
-       user.fire();
+       user =  @users[_arg.who];
+       user.fire(_arg)
+       console.log(_arg)
+
+       if _arg.target
+           console.log("fired at target")
+           target = @users[_arg.target.uid]
+           target.stat.hp = _arg.target.hp
+           target.stat.dead = _arg.target.dead
+
+           if target.uid == @user_self
+               console.log("oh, its me! #{target.stat.hp}")
+               @_self_stat.render()
+               @_self_stat.warning()
 
     err: (msg) -> alert msg
 
@@ -31,6 +45,8 @@ class MMap
 
 
     set_self: (_arg) ->
+        console.log("set self")
+        console.log(@users[_arg.uid])
         @user_self = _arg.uid;
 
     add_user: (_arg, y, img) ->
@@ -40,16 +56,19 @@ class MMap
             y = _arg.y;
             img = _arg.char;
             uid = _arg.uid;
+            name = _arg.name
+            stat = _arg.stat
         else
             x = _arg;
             uid = this._user;
 
-
         if this.users[uid]
             return;
 
-        user = new User(uid, x, y, img)
+        user = new User(uid, x, y, img, name, stat)
         user.draw();
+        if uid == @user_self
+            @self_stat(user)
 
         hex = (this.cells[user.x] || [])[user.y];
         @users[uid] = user;
@@ -64,6 +83,9 @@ class MMap
 
         return user;
 
+    self_stat: (user) ->
+        @_self_stat = new Stat(user, "self_stat")
+
     move: (_arg, new_x, new_y) ->
 
         user =  @users[_arg.uid];
@@ -75,17 +97,6 @@ class MMap
 
         if user.x!=undefined
             old = user.hex;
-            taints = [old]
-            for xoff in [-2, 0, 2]
-                col = @cells[user.x + xoff] || []
-                if ! col
-                    break
-
-                # XXX: buggy tiles. should be [-1, 1]
-                for yoff in [-2, -1, 1, 2]
-                    _hex = col[user.y + yoff]
-                    if _hex
-                        taints.push(_hex)
         else
             old = false
 
@@ -103,7 +114,7 @@ class MMap
                 user.show(new_x, new_y, next.vp);
                 next.use(user);
         else
-            user.move(new_x, new_y, next.vp, taints || []);
+            user.move(new_x, new_y, next.vp)
 
             if old
                 old.free();
@@ -226,3 +237,24 @@ class MMap
 
         for user_id in Object.keys(@users)
             @users[user_id].taint = true
+
+    current_hex: ->
+        vp = @vp[0]
+
+        x = window.fg.mouseX
+        y = window.fg.mouseY
+
+        col = Math.floor(x / HEX_H)
+        row = Math.floor(y / HEX_W)
+
+        if col % 2
+            col -= 1
+
+        if col % 4 and (row % 2) == 0
+            row += 1
+        else if row % 2 and (col % 4) == 0
+            row += 1
+
+        hex = @cells[col][row]
+
+        return hex

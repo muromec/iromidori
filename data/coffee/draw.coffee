@@ -57,7 +57,11 @@ window.draw_map = (el) ->
     key("right", () -> map.recenter(1));
 
     key('f', () ->
-        server.push({"url": "/fire"})
+        hex = map.current_hex()
+        server.push(
+            url: "/fire"
+            point: [hex.col, hex.row]
+        )
     )
 
     server_cb = (data) ->
@@ -66,11 +70,13 @@ window.draw_map = (el) ->
 
     server = new Server(server_cb)
 
-    enter_now = (char_data) ->
-        console.log(char_data)
+    enter_now = (char_typ, name) ->
         server.connect()
-        server.push({"url": "/enter", "char_type": char_data})
+        server.push(
+            url: "/enter"
+            char_type: char_typ
+            char_name: name
+        )
 
 
     enter = new EnterControl(enter_now)
-    enter.fetch()
