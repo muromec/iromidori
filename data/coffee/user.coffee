@@ -24,6 +24,7 @@ class User
         @taint = true
 
         li = new Lighting(pos, li_to, this)
+        a = new Circle(this, li_to, false)
 
     where: ->
         x = (@x - @vp.col) * HEX_W;

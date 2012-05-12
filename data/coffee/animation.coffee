@@ -24,10 +24,11 @@ class FAnimation
 
     draw: =>
         @frame += 1
-
-        if @frame > 30
+        if @stop()
             @remove()
             return
+
+    stop: -> @frame > 30
 
     remove: ->
         @ps.exit()
@@ -48,6 +49,8 @@ class Lighting extends FAnimation
         off_y = Math.floor(Math.random()*15)
         off_x_2 = Math.floor(Math.random()*HEX_W_FULL)
         off_y_2 = Math.floor(Math.random()*HEX_H)
+        off_x_2 -= HEX_W_FULL /2
+        off_y_2 -= HEX_H /2
 
         if @user
             pos = @user.where()
@@ -64,3 +67,33 @@ class Lighting extends FAnimation
 
         @ps.line(pos.x + off_x, pos.y+ off_y,
             @li_to.x + off_x_2, @li_to.y + off_y_2)
+
+
+class Circle extends FAnimation
+
+    constructor: (@user, @li_frm, @on_user) ->
+        @sz = 50
+        super()
+
+    stop: -> @frame > 15
+
+    draw: =>
+
+        super()
+
+        @ps.stroke(130 + (@frame * 8))
+        @ps.strokeWeight(1.2)
+
+        pos = @li_frm
+
+        if @on_user and @user and  @user.img._dir
+            off_x = HEX_W_FULL
+        else
+            off_x = 0
+
+        @ps.fill(5, 0.5)
+
+        @sz += 5 + @frame
+        @ps.ellipse(pos.x + off_x, pos.y, @sz, @sz)
+        @ps.stroke(100, 100, 200)
+        @ps.ellipse(pos.x + off_x, pos.y, @sz+1, @sz)
