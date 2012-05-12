@@ -31,7 +31,8 @@ class MMap
                @_self_stat.render()
                @_self_stat.warning()
 
-    err: (msg) -> alert msg
+    err: (msg) ->
+        new ErrBox(msg)
 
     drop_user: (_arg) ->
         user =  @users[_arg.uid];

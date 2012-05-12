@@ -36,3 +36,18 @@ canvas {
 .warning {
     background-color: red;
 }
+
+.err_box {
+    background-color: wheat;
+    position: relative;
+    width: 100px;
+    margin-left: -50px;
+    left: 50%;
+    top: 100px;
+    z-index: 1000;
+    padding: 15px;
+}
+
+.err_box .ok_btn {
+    padding: 5px;
+}
