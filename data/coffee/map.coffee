@@ -15,6 +15,15 @@ class MMap
         
         window.mmap = this
 
+    stats: (_arg) ->
+        console.log(_arg)
+        user =  @users[_arg.who];
+        user.stat.hp = _arg.stat.hp
+        user.stat.dead = _arg.dead
+
+        if user.uid == @user_self
+            @_self_stat.render()
+
     fire: (_arg) ->
        user =  @users[_arg.who];
 

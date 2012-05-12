@@ -1,4 +1,4 @@
-from biribiri.chain.utils import view, upd_ctx
+from biribiri.chain.utils import view, upd_ctx, match
 from uuid import uuid4
 from iromidori import util
 from iromidori.char import hp_check
@@ -71,8 +71,34 @@ def do_fire(group, point, who, **kw):
     if target_p:
         player.stat['hp'] -= 10
 
+        if target_p.dead:
+            target_p.sched(10, do='hp', hp=10)
+
     return target_p, None
- 
+
+@match(do='hp')
+def set_hp(who, hp, **kw):
+    who.stat['hp'] = hp
+
+    if hp < 60:
+        who.sched(15, do='hp', hp=hp+10)
+
+    return [
+            util.group_send,
+            notify_stat,
+    ]
+
+@upd_ctx("send_out")
+def notify_stat(who, **kw):
+    return {
+            "fn": "stats",
+            "data": {
+                "who": who.uid,
+                "stat": who.stat,
+                "dead": who.dead,
+            }
+    }
+
 @upd_ctx("send_out")
 def notify_fire(who, target, point, **kw):
     target_o = {

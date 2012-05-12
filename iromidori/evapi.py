@@ -9,6 +9,9 @@ def evapi(**kw):
 
 
 def parse(upd_ctx, raw=None, msg=None, **kw):
+    if not msg and not raw:
+        return
+
     if not msg:
         msg = loads(raw)
 
@@ -23,6 +26,7 @@ def route(**kw):
             state.enter,
             state.out,
             state.fire,
+            state.set_hp,
             move.move,
             move.vp,
             move.vp_edit,
