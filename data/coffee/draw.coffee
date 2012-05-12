@@ -62,11 +62,11 @@ window.draw_map = (el) ->
     key("left", () -> map.recenter(-1));
     key("right", () -> map.recenter(1));
 
+    ###
     key('f', () ->
         server.push({"url": "/fire"})
     )
 
-    ###
     server_cb = (data) ->
         console.log("got "+data.fn)
         map[data.fn](data.data)

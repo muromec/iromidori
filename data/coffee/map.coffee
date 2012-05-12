@@ -117,12 +117,15 @@ class MMap
             ps.size($(window).width(), $(window).height())
             ps.background(0)
             ps.frameRate(4)
+            ps.clear = true
 
         ps.draw = () =>
             for vp in map_vp
                 for hex in vp.hexes
-                    if hex.taint
+                    if hex.taint or ps.clear
                         hex.draw()
+
+            ps.clear = false
 
     draw_fg: (ps) =>
         console.log("draw fg #{this}..#{@vp}")
