@@ -88,7 +88,7 @@ class User
 
     draw: ->
 
-        if ! @img.img.loaded
+        if ! @img._full.loaded
             return
 
         if @vp.hidden
@@ -116,7 +116,7 @@ class User
         #this.img._sprite = 0;
         
         pos = @where()
-        
-        window.fg.image(@img.img, pos.x + @off_x, pos.y - char_h + @off_y)
+
+        window.fg.image(@img.get_frame(), pos.x + @off_x, pos.y - char_h + @off_y)
         if ! (@_cycle_id or @img._cycle_id)
             @taint = false
