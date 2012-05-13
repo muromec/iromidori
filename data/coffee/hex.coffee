@@ -50,7 +50,7 @@ class Hex
 
         @taint = false
 
-    ellips:
+    ellips: ->
         window.map.fill(5, 0.5)
         window.map.ellipse(@x + @vp.x + HEX_W_FULL/2, @y + @vp.y,
             HEX_W_FULL, HEX_H*2)
