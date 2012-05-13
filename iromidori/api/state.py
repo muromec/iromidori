@@ -1,4 +1,6 @@
 from biribiri.chain.utils import view, upd_ctx, match
+from biribiri.chain import Stop
+
 from uuid import uuid4
 from iromidori import util
 from iromidori.char import hp_check
@@ -53,8 +55,22 @@ def fire(who, group, point, **kw):
             notify_fire,
             do_fire,
             hp_check,
+            range_check,
     ]
 
+def m(x):
+    return -x if  x < 0 else x
+
+def range_check(who, point, **kw):
+    x,y = point
+    x_o = m(who.x - x)
+    y_o = m(who.y - y)
+
+    import math
+    dst = math.sqrt(x_o**2 + y_o**2)
+    print dst
+    if dst > 15:
+        raise Stop
 
 @upd_ctx("target")
 def do_fire(group, point, who, **kw):
