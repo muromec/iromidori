@@ -50,8 +50,13 @@ class Hex
 
         @taint = false
 
+    ellips:
+        window.map.fill(5, 0.5)
+        window.map.ellipse(@x + @vp.x + HEX_W_FULL/2, @y + @vp.y,
+            HEX_W_FULL, HEX_H*2)
+
     where: ->
         return {
-            x: @x + @vp.x,
-            y: @y + @vp.y - HEX_H,
+            x: @x + @vp.x + (HEX_W_FULL/2),
+            y: @y + @vp.y,
         }

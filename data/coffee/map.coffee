@@ -252,6 +252,7 @@ class MMap
 
         x = window.mouseX
         y = window.mouseY
+        y += HEX_H
 
         col = Math.floor(x / HEX_H) + @vp[0].col
         row = Math.floor(y / HEX_W) + @vp[0].row
