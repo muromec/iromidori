@@ -26,12 +26,12 @@ class Sprite
 
         sprite_map = [
             "base0",
+            "go0",
+            "go1",
             "fire0",
             "fire1",
             "fire2",
             "fire3",
-            "go0",
-            "go1",
         ]
 
         y = 0

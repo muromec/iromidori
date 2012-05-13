@@ -1,6 +1,8 @@
 PY_VER  = $(shell python -V 2>&1 | cut -f 2 -d ' ' | cut -f 1 -d .)
 TORNADO = $(wildcard etc/eggs/tornado-2*.egg/tornado/)
 
+CHARS = $(patsubst %_0.png,%_sprite.png,$(wildcard data/img/char/*_0.png))
+
 P=/sbin:/usr/sbin:$(PATH)
 
 ifeq ($(PY_VER), 3)
@@ -10,7 +12,12 @@ else
 
 endif
 
-all: run
+%_sprite.png: %_0.png
+	sh merge.sh $(patsubst %_0.png,%,$<)
+
+tiles: $(CHARS)
+
+all: tiles run
 
 build: env/bin/python install reload
 
@@ -22,8 +29,6 @@ run: env/bin/python
 
 run_bot: env/bin/python
 	env PYTHONPATH=. bin/python iromidori/botclient.py
-
-build: bin/py
 
 D=/var/lib/buildbot/midori-current/
 MAP=/var/lib/buildbot/midori-data/
