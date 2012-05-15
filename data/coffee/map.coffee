@@ -4,15 +4,17 @@ class MMap
         @users = new Object();
         @_user = 0;
 
-        @width = Math.ceil(window.innerWidth/(cols/2)/HEX_W);
-        @height = Math.ceil(window.innerHeight/(rows/2)/HEX_H);
+        @width = Math.ceil(window.innerWidth/cols/HEX_W);
+        @height = Math.ceil(window.innerHeight/rows/HEX_H);
 
         @_waits = 0;
 
-        @shift_x = Math.round(cols/3);
-        @shift_y = Math.round(rows/3);
         @vp = []
         
+        @base_loc = window.location.toString()
+        if @base_loc.indexOf('#') > -1
+            @base_loc = @base_loc.substr(0, @base_loc.indexOf('#'))
+
         window.mmap = this
 
     stats: (_arg) ->
@@ -65,36 +67,31 @@ class MMap
         @user_self = _arg.uid;
 
     add_user: (_arg, y, img) ->
-
-        if typeof(_arg) == 'object'
-            x = _arg.x;
-            y = _arg.y;
-            img = _arg.char;
-            uid = _arg.uid;
-            name = _arg.name
-            stat = _arg.stat
-        else
-            x = _arg;
-            uid = this._user;
-
+        
+        uid = _arg.uid
         if this.users[uid]
             return;
 
-        user = new User(uid, x, y, img, name, stat)
-        user.draw();
-        if uid == @user_self
-            @self_stat(user)
-
+        user = new User(uid, _arg.x, _arg.y, _arg.img, _arg.name, _arg.stat)
+    
         hex = (this.cells[user.x] || [])[user.y];
         @users[uid] = user;
 
         if hex
             user.show(@vp[0])
-
             hex.use(user);
-            user.hex = hex;
+
+            user.draw();
+            user.vp = hex.vp
         else
             user.hide();
+
+        if uid == @user_self
+            @self_stat(user)
+
+        if uid == @user_self and hex
+            @recenter(0)
+            @set_pos(user.vp)
 
         return user;
 
@@ -119,15 +116,17 @@ class MMap
         col = @cells[new_x] || [];
         next = col[new_y];
 
-        if !next
+        if !next or next.vp.hidden
             console.log("gone out");
             user.hide();
             return;
 
-        if user.x==undefined
-            if !next.vp.hidden
-                user.show(new_x, new_y, next.vp);
-                next.use(user);
+        user.vp = next.vp
+        console.log("user mvoing #{user.x} #{next.vp.id} #{next.vp.hidden}")
+        if user.hidden
+            console.log("show from nowhere!")
+            user.show(new_x, new_y, next.vp);
+            next.use(user);
         else
             user.move(new_x, new_y, next.vp)
 
@@ -136,7 +135,12 @@ class MMap
 
             next.use(user);
 
-        user.vp = next.vp
+
+        if old and old != user.vp
+            @set_pos(old.vp)
+
+    set_pos: (vp) ->
+        window.location = "#{@base_loc}##{vp.col}x#{vp.row}"
 
     draw_map: (ps) =>
         console.log("draw #{this}..#{@vp} #{@ri}")
@@ -206,6 +210,7 @@ class MMap
             vp = @vp[0].top()
 
         @setup_vp(vp.col, vp.row)
+        @set_pos(vp)
         return @_recenter()
 
     setup_vp: (col, row) ->
@@ -219,7 +224,7 @@ class MMap
             vp.x = 0
             vp.y = 0
         else
-            vp = new ViewPort this, col, row, @cols/2, @rows/2
+            vp = new ViewPort this, col, row, @cols, @rows
 
         vp.id = 0;
 

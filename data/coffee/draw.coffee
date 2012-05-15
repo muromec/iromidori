@@ -11,8 +11,8 @@ window.draw_map = (el) ->
 
     )
     
-    rows = 24
-    cols = 32
+    rows = 12
+    cols = 16
 
     map = new MMap rows, cols
     map.vpc = new VPCache
@@ -22,7 +22,25 @@ window.draw_map = (el) ->
 
     console.log("vps: #{ map.width }x#{ map.height}")
 
-    map.setup_vp(0, 0)
+    parse_loc = (inp) ->
+        res = /.*#([0-9]+)x([0-9]+)/.exec(inp)
+        if res is null
+            return [0,0]
+
+        [_res, x, y] = res
+        x = Number(x)
+        y = Number(y)
+
+        if x == NaN or y == NaN
+            return [0,0]
+        
+        x = Math.round(x/cols) * cols
+        y = Math.round(y/rows) * rows
+        return [x,y]
+
+    [x, y] = parse_loc(window.location.toString())
+    console.log("setup at #{x} x #{y}")
+    map.setup_vp(x, y)
 
     move = (ox, oy) ->
         server.push({"ox": ox, "oy": oy, "url": "/move"})
@@ -66,4 +84,4 @@ window.draw_map = (el) ->
         )
 
 
-    enter = new EnterControl(enter_now)
+    window.enter = new EnterControl(enter_now)

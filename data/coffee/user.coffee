@@ -88,6 +88,9 @@ class User
 
     draw: ->
 
+        if @hidden
+            return
+
         if ! @img._full.loaded
             return
 
