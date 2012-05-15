@@ -5,14 +5,6 @@ class Hex
         @taint = true
     
     set_image: (@back_img_name) ->
-        if @back_img_name == null
-            @back_img_name = "grass"
-            @gray = true
-        else
-            @gray = false
-
-        img = "/img/tile/#{ @back_img_name }_0.png"
-        @back_img = window.map.loadImage(img)
         @taint = true
 
     use: (whom) ->
@@ -39,16 +31,15 @@ class Hex
         @taint = true
 
     draw: () ->
-        if ! @back_img.loaded
+        img = Hex.hl.get(@back_img_name)
+        if ! img
             @taint = true
             return
 
-        if @gray
-            @back_img.filter(window.map.GRAY)
-
-        window.map.image(@back_img, @x + @vp.x, @y + @vp.y - HEX_H)
+        window.map.image(img, @x + @vp.x, @y + @vp.y - HEX_H)
 
         @taint = false
+        return true
 
     ellips: ->
         window.map.fill(5, 0.5)
@@ -60,3 +51,32 @@ class Hex
             x: @x + @vp.x + (HEX_W_FULL/2),
             y: @y + @vp.y,
         }
+
+class HexLib
+    constructor: ->
+        @loaded = {}
+
+    get: (name) ->
+        fname = name
+        if name == null
+            fname = "grass"
+            gray = true
+        else
+            gray = false
+
+        img = @loaded[name]
+        if not img
+            fname = "/img/tile/#{fname}_0.png"
+            img = window.map.loadImage(fname)
+            @loaded[name] = img
+
+        if not img.loaded
+            return null
+
+        if gray and not img.gray
+            img.filter(window.map.GRAY)
+            img.gray = true
+
+        return img
+
+Hex.hl = new HexLib()
