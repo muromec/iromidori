@@ -52,8 +52,11 @@ if __name__ == '__main__':
 
     ])
     http_server = HTTPServer(application)
-    #http_server.listen(80)
-    http_server.listen(31574)
+    if sys.argv[1:]:
+        port = int(sys.argv[1])
+    else:
+        port = 80
+    http_server.listen(port)
 
     ioloop = IOLoop.instance()
     EventSocket.io_loop = ioloop
