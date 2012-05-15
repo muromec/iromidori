@@ -21,6 +21,26 @@ all: tiles run
 
 build: env/bin/python install reload
 
+JS_ALL_NAMES = jquery-1.7.2.min.js \
+	processing-1.3.6.min.js \
+	coffee-script.js \
+	eco.js \
+	keymaster.min.js \
+
+JS_ALL = $(patsubst %.js,data/js/%.js, $(JS_ALL_NAMES))
+COFFEE_ALL = $(wildcard data/coffee/*.coffee)
+
+data/js/draw.js: $(COFFEE_ALL)
+	coffee -c -j $@ $(COFFEE_ALL)
+
+data/midori.min.js: $(JS_ALL) data/js/draw.js
+	cat $(JS_ALL) > $@
+	echo ';;' >> $@
+	cat data/js/draw.js >> $@
+
+
+compile: data/js/draw.js data/midori.min.js
+
 env/bin/python:
 	$(PY) -m virtualenv env
 
