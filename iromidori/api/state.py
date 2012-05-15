@@ -30,7 +30,7 @@ def enter(who, group, char_type, char_name, **kw):
             "data": {
                 "x": cn.x,
                 "y": cn.y,
-                "char": cn.char,
+                "img": cn.char,
                 "uid": cn.uid,
                 "name": cn.name,
                 "stat": cn.stat,
@@ -40,6 +40,7 @@ def enter(who, group, char_type, char_name, **kw):
 
 @view(url="/out")
 def out(who, group, **kw):
+    who.point.pop("used", None)
     group.send({
         "fn": "drop_user",
         "data" : {
