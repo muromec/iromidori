@@ -12,8 +12,6 @@ class Stat
         <% end %>
         """
 
-        console.log(@user)
-
         html = eco.render(source, @user)
 
         @$element.html(html)

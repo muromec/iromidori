@@ -1,5 +1,5 @@
 class User
-    constructor: (@uid, @x, @y, @img_name, @name, @stat) ->
+    constructor: (@uid, @img_name, @name, @stat) ->
         @hidden = true
         img = "/img/char/#{ @img_name }_0.png"
         @img = new Sprite("char", @img_name, 0)
@@ -33,12 +33,15 @@ class User
             y: y + @vp.y,
         }
 
-    show: (vp) ->
+    show: (@x, @y, vp) ->
         @hidden = false;
         @vp = vp
+        @taint = true
+        console.log("show at #{@x}x#{@y}")
     
-    hide: ->
+    hide: (@x, @y) ->
         @hidden = true;
+        @taint = true
 
     move: (new_x, new_y, vp) ->
 
@@ -92,9 +95,6 @@ class User
             return
 
         if ! @img._full.loaded
-            return
-
-        if @vp.hidden
             return
 
         char_w = 100

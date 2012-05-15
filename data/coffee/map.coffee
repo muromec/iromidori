@@ -63,7 +63,6 @@ class MMap
 
     set_self: (_arg) ->
         console.log("set self")
-        console.log(@users[_arg.uid])
         @user_self = _arg.uid;
 
     add_user: (_arg, y, img) ->
@@ -72,19 +71,23 @@ class MMap
         if this.users[uid]
             return;
 
-        user = new User(uid, _arg.x, _arg.y, _arg.img, _arg.name, _arg.stat)
+        user = new User(uid, _arg.img, _arg.name, _arg.stat)
     
-        hex = (this.cells[user.x] || [])[user.y];
+        hex = (this.cells[_arg.x] || [])[_arg.y];
         @users[uid] = user;
 
         if hex
-            user.show(@vp[0])
+            user.show(_arg.x, _arg.y, @vp[0])
             hex.use(user);
-
-            user.draw();
-            user.vp = hex.vp
         else
-            user.hide();
+            user.hide(_arg.x, _arg.y)
+            user.vp = 
+                col: Math.floor(_arg.x/@cols) * @cols
+                row: Math.floor(_arg.y/@rows) * @rows
+                id: "nowhere"
+                hidden: true
+
+            @recenter(0)
 
         if uid == @user_self
             @self_stat(user)
@@ -116,13 +119,23 @@ class MMap
         col = @cells[new_x] || [];
         next = col[new_y];
 
+        console.log("user mvoing #{new_x}x#{new_y}")
+        if old
+            old.free();
+
         if !next or next.vp.hidden
             console.log("gone out");
-            user.hide();
+            user.hide(new_x, new_y)
+            user.vp =
+                col: Math.floor(new_x/@cols) * @cols
+                row: Math.floor(new_y/@rows) * @rows
+
+            if user.uid == @user_self
+                @recenter(0)
+
             return;
 
         user.vp = next.vp
-        console.log("user mvoing #{user.x} #{next.vp.id} #{next.vp.hidden}")
         if user.hidden
             console.log("show from nowhere!")
             user.show(new_x, new_y, next.vp);
@@ -130,13 +143,9 @@ class MMap
         else
             user.move(new_x, new_y, next.vp)
 
-            if old
-                old.free();
-
             next.use(user);
 
-
-        if old and old != user.vp
+        if old and old.vp != user.vp
             @set_pos(old.vp)
 
     set_pos: (vp) ->
@@ -188,7 +197,24 @@ class MMap
         window.map.clear = true
         for user_id in Object.keys(@users)
             user = @users[user_id]
+            user.hidden = user.vp.hidden
             user.taint = true
+            console.log("user #{user.id}")
+            if not user.hex
+                console.log("no hex #{user.x}x#{user.y}")
+                hex = (this.cells[user.x] || [])[user.y];
+                if hex
+                    console.log("found hex #{hex.col}x#{hex.row}")
+                    user.show(hex.col, hex.row, hex.vp)
+                    hex.use(user);
+
+            if user.vp.hidden
+                user.vp.id = 
+                    id: "nowhere"
+                    hidden: true
+                    col: user.vp.col
+                    row: user.vp.row
+
 
     recenter: (move_dir) ->
         console.log("recenter #{move_dir}");
@@ -196,6 +222,7 @@ class MMap
         if move_dir == 0
             user = @users[@user_self]
             if user.vp.id == @vp[0].id
+                console.log("nope")
                 return
 
             vp = user.vp
@@ -211,6 +238,8 @@ class MMap
 
         @setup_vp(vp.col, vp.row)
         @set_pos(vp)
+
+        console.log("recentered to #{vp.col}x#{vp.row}")
         return @_recenter()
 
     setup_vp: (col, row) ->

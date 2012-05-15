@@ -17,6 +17,10 @@ class Server
             console.log("already connected. wtf?");
             return;
 
+        # cloudflare cannot into websockets
+        if @domain.indexOf("midori.") > -1
+            @domain = "ws."+@domain
+
         @s = new WebSocket("ws://#{@domain}/events")
         @s.onmessage = @onmessage;
         @s.onopen = @onopen;

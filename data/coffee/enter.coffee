@@ -11,8 +11,6 @@ class EnterControl
 
     _fetched: (data) =>
         @charlist = data.chars;
-        console.log(data)
-        console.log(this)
         @show()
 
     fetch: ->
