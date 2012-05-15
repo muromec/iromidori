@@ -1,14 +1,11 @@
 class EnterControl
-    $join: $(".join")
-    $name: $("input.char_name")
-
     constructor: (@cb) ->
         @charlist = [];
-        @$join.on("click", @on_join)
+
+        $('body').on("click", 'a.join', @on_join)
 
     on_join: (evt) =>
         @fetch()
-        @$join.hide()
 
         return false
 
@@ -50,8 +47,8 @@ class EnterControl
         )
 
     selected: (typ) =>
-        $name = $("input.char_name")
 
+        $name = $("input.char_name")
         name = $name.val()
         if (name.length < 1)
             alert("Enter username")
