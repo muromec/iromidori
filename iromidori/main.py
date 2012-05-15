@@ -48,9 +48,13 @@ if __name__ == '__main__':
             (r"/events", EventSocket),
             (r"/api/.*", ApiHandler),
             (r"/(.*(png|js|html|css))", web.StaticFileHandler, {"path": DATA}),
+            (r"/()$", web.StaticFileHandler, {"path": DATA, "default_filename": "index.html"}),
+
     ])
     http_server = HTTPServer(application)
+    #http_server.listen(80)
     http_server.listen(31574)
+
     ioloop = IOLoop.instance()
     EventSocket.io_loop = ioloop
     ioloop.start()
