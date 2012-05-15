@@ -23,7 +23,7 @@ window.draw_map = (el) ->
     console.log("vps: #{ map.width }x#{ map.height}")
 
     parse_loc = (inp) ->
-        res = /.*#([0-9]+)x([0-9]+)/.exec(inp)
+        res = /.*#([-{0,1}0-9]+)x(-{0,1}[0-9]+)/.exec(inp)
         if res is null
             return [0,0]
 
